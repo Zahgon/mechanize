@@ -18,10 +18,7 @@ class SetupStack(object):
 
 class TearDownConvenience(object):
     def __init__(self, setup_stack=None):
-        self._own_setup_stack = setup_stack is None
-        if setup_stack is None:
-            setup_stack = SetupStack()
-        self._setup_stack = setup_stack
+        pass
 
     # only call this convenience method if no setup_stack was supplied to c'tor
     def tear_down(self):

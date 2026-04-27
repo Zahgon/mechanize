@@ -94,40 +94,10 @@ class UserAgentBase(_opener.OpenerDirector):
         default_schemes.append("https")
 
     def __init__(self):
-        _opener.OpenerDirector.__init__(self)
-
-        ua_handlers = self._ua_handlers = {}
-        for scheme in (self.default_schemes + self.default_others +
-                       self.default_features):
-            klass = self.handler_classes[scheme]
-            ua_handlers[scheme] = klass()
-        for handler in tuple(itervalues(ua_handlers)):
-            self.add_handler(handler)
-
-        # Yuck.
-        # Ensure correct default constructor args were passed to
-        # HTTPRefreshProcessor and HTTPEquivProcessor.
-        if "_refresh" in ua_handlers:
-            self.set_handle_refresh(True)
-        if "_equiv" in ua_handlers:
-            self.set_handle_equiv(True)
-        # Ensure default password managers are installed.
-        pm = ppm = None
-        if "_basicauth" in ua_handlers or "_digestauth" in ua_handlers:
-            pm = _urllib2.HTTPPasswordMgrWithDefaultRealm()
-        if ("_proxy_basicauth" in ua_handlers or
-                "_proxy_digestauth" in ua_handlers):
-            ppm = _auth.HTTPProxyPasswordMgr()
-        self.set_password_manager(pm)
-        self.set_proxy_password_manager(ppm)
-        # set default certificate manager
-        if "https" in ua_handlers:
-            cm = _urllib2.HTTPSClientCertMgr()
-            self.set_client_cert_manager(cm)
+        pass
 
     def close(self):
-        _opener.OpenerDirector.close(self)
-        self._ua_handlers = None
+        pass
 
 # XXX
 # def set_timeout(self, timeout):
@@ -209,20 +179,15 @@ class UserAgentBase(_opener.OpenerDirector):
     # instead
     def set_password_manager(self, password_manager):
         """Set a mechanize.HTTPPasswordMgrWithDefaultRealm, or None."""
-        self._password_manager = password_manager
-        self._set_handler("_basicauth", obj=password_manager)
-        self._set_handler("_digestauth", obj=password_manager)
+        pass
 
     def set_proxy_password_manager(self, password_manager):
         """Set a mechanize.HTTPProxyPasswordMgr, or None."""
-        self._proxy_password_manager = password_manager
-        self._set_handler("_proxy_basicauth", obj=password_manager)
-        self._set_handler("_proxy_digestauth", obj=password_manager)
+        pass
 
     def set_client_cert_manager(self, cert_manager):
         """Set a mechanize.HTTPClientCertMgr, or None."""
-        handler = self._ua_handlers["https"]
-        self._client_cert_manager = handler.client_cert_manager = cert_manager
+        pass
 
     def set_ca_data(self, cafile=None, capath=None, cadata=None, context=None):
         '''
@@ -249,11 +214,7 @@ class UserAgentBase(_opener.OpenerDirector):
 
     def set_handle_refresh(self, handle, max_time=None, honor_time=True):
         """Set whether to handle HTTP Refresh headers."""
-        self._set_handler(
-            "_refresh",
-            handle,
-            constructor_kwds={"max_time": max_time,
-                              "honor_time": honor_time})
+        pass
 
     def set_handle_equiv(self, handle, head_parser_class=None):
         """Set whether to treat HTML http-equiv headers like HTTP headers.
@@ -262,11 +223,7 @@ class UserAgentBase(_opener.OpenerDirector):
         responses are, raised HTTPError exception responses are not).
 
         """
-        if head_parser_class is not None:
-            constructor_kwds = {"head_parser_class": head_parser_class}
-        else:
-            constructor_kwds = {}
-        self._set_handler("_equiv", handle, constructor_kwds=constructor_kwds)
+        pass
 
     def set_request_gzip(self, handle):
         """Add header indicating to server that we handle gzip
@@ -336,38 +293,16 @@ class UserAgentBase(_opener.OpenerDirector):
                      obj=None,
                      constructor_args=(),
                      constructor_kwds={}):
-        if handle is None:
-            handle = obj is not None
-        if handle:
-            handler_class = self.handler_classes[name]
-            if obj is not None:
-                newhandler = handler_class(obj)
-            else:
-                newhandler = handler_class(*constructor_args,
-                                           **constructor_kwds)
-        else:
-            newhandler = None
-        self._replace_handler(name, newhandler)
+        pass
 
     def _replace_handler(self, name, newhandler=None):
         # first, if handler was previously added, remove it
-        if name is not None:
-            handler = self._ua_handlers.pop(name, None)
-            if handler is not None:
-                try:
-                    self.handlers.remove(handler)
-                except ValueError:
-                    pass
-        # then add the replacement, if any
-        if newhandler is not None:
-            self.add_handler(newhandler)
-            self._ua_handlers[name] = newhandler
+        pass
 
 
 class UserAgent(UserAgentBase):
     def __init__(self):
-        UserAgentBase.__init__(self)
-        self._seekable = False
+        pass
 
     def set_seekable_responses(self, handle):
         """Make response objects .seek()able."""

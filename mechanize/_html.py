@@ -41,15 +41,7 @@ lazy_encoding_pats = LazyEncodingPats()
 
 
 def find_declared_encoding(raw, limit=50*1024):
-    prefix = raw[:limit]
-    is_binary = isinstance(raw, bytes)
-    for pat in lazy_encoding_pats(is_binary):
-        m = pat.search(prefix)
-        if m is not None:
-            ans = m.group(1)
-            if is_binary:
-                ans = ans.decode('ascii', 'replace')
-                return ans
+    pass
 
 
 def elem_text(elem):
@@ -61,24 +53,14 @@ def iterlinks(root, base_url):
 
 
 def compress_whitespace(text):
-    return re.sub(r'\s+', ' ', text or '').strip()
+    pass
 
 
 def get_encoding_from_response(response, verify=True):
     # HTTPEquivProcessor may be in use, so both HTTP and HTTP-EQUIV
     # headers may be in the response.  HTTP-EQUIV headers come last,
     # so try in order from first to last.
-    if response:
-        for ct in response.info().getheaders("content-type"):
-            for k, v in split_header_words([ct])[0]:
-                if k == "charset":
-                    if not verify:
-                        return v
-                    try:
-                        codecs.lookup(v)
-                        return v
-                    except LookupError:
-                        continue
+    pass
 
 
 class EncodingFinder:
@@ -86,7 +68,7 @@ class EncodingFinder:
         self._default_encoding = default_encoding
 
     def encoding(self, response):
-        return get_encoding_from_response(response) or self._default_encoding
+        pass
 
 
 class ResponseTypeFinder:
@@ -94,10 +76,7 @@ class ResponseTypeFinder:
         self._allow_xhtml = allow_xhtml
 
     def is_html(self, response, encoding):
-        ct_hdrs = response.info().getheaders("content-type")
-        url = response.geturl()
-        # XXX encoding
-        return _is_html(ct_hdrs, url, self._allow_xhtml)
+        pass
 
 
 class Link:
@@ -113,11 +92,7 @@ class Link:
 
     '''
     def __init__(self, base_url, url, text, tag, attrs):
-        assert None not in [url, tag, attrs]
-        self.base_url = base_url
-        self.absolute_url = urljoin(base_url, url)
-        self.url, self.text, self.tag, self.attrs = url, text, tag, attrs
-        self.text = self.text
+        pass
 
     def __eq__(self, other):
         try:
@@ -158,25 +133,11 @@ def content_parser(data,
         could be detected and no transport_encoding is specified
     :param is_html: If the document is to be parsed as HTML.
     '''
-    if not is_html:
-        return
-    try:
-        from html5_parser import parse
-    except Exception:
-        from html5lib import parse
-        kw = {'namespaceHTMLElements': False}
-        if transport_encoding and isinstance(data, bytes):
-            kw['transport_encoding'] = transport_encoding
-        return parse(data, **kw)
-    else:
-        return parse(data, transport_encoding=transport_encoding)
+    pass
 
 
 def get_title(root):
-    for title in root.iter('title'):
-        text = compress_whitespace(title.text)
-        if text:
-            return text
+    pass
 
 
 lazy = object()
@@ -219,20 +180,10 @@ class Factory:
         Pass keyword arguments only.
 
         """
-        self._encoding_finder = EncodingFinder(default_encoding)
-        self.form_encoding = default_encoding
-        self._response_type_finder = ResponseTypeFinder(
-            allow_xhtml=allow_xhtml)
-        self._content_parser = content_parser
-        self._current_forms = self._current_links = self._current_title = lazy
-        self._current_global_form = self._root = lazy
-        self._raw_data = b''
-        self.is_html, self.encoding = False, DEFAULT_ENCODING
-
-        self.set_response(None)
+        pass
 
     def set_content_parser(self, val):
-        self._content_parser = val
+        pass
 
     def set_request_class(self, request_class):
         """Set request class (mechanize.Request by default).
@@ -241,7 +192,7 @@ class Factory:
         class when .click()ed.
 
         """
-        self._request_class = request_class
+        pass
 
     def set_response(self, response):
         """Set response.
@@ -250,12 +201,7 @@ class Factory:
         objects returned by mechanize.urlopen().
 
         """
-        self._response = copy.copy(response)
-        self._current_forms = self._current_links = self._current_title = lazy
-        self._current_global_form = self._root = lazy
-        self.encoding = self._encoding_finder.encoding(self._response)
-        self.is_html = self._response_type_finder.is_html(
-            self._response, self.encoding) if self._response else False
+        pass
 
     @property
     def root(self):

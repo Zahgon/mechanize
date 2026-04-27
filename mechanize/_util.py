@@ -24,11 +24,11 @@ def experimental(message):
 
 
 def hide_experimental_warnings():
-    warnings.filterwarnings("ignore", category=ExperimentalWarning)
+    pass
 
 
 def reset_experimental_warnings():
-    warnings.filterwarnings("default", category=ExperimentalWarning)
+    pass
 
 
 def deprecation(message):
@@ -44,30 +44,19 @@ def reset_deprecations():
 
 
 def read_file(filename):
-    with open(filename, 'rb') as f:
-        return f.read()
+    pass
 
 
 def write_file(filename, data):
-    f = open(filename, "wb")
-    try:
-        f.write(data)
-    finally:
-        f.close()
+    pass
 
 
 def get1(sequence):
-    assert len(sequence) == 1
-    return sequence[0]
+    pass
 
 
 def isstringlike(x):
-    try:
-        x + ""
-    except Exception:
-        return False
-    else:
-        return True
+    pass
 
 # Date/time conversion routines for formats used by the HTTP protocol.
 
@@ -76,12 +65,7 @@ EPOCH = 1970
 
 
 def my_timegm(tt):
-    year, month, mday, hour, min, sec = tt[:6]
-    if ((year >= EPOCH) and (1 <= month <= 12) and (1 <= mday <= 31) and
-            (0 <= hour <= 24) and (0 <= min <= 59) and (0 <= sec <= 61)):
-        return timegm(tt)
-    else:
-        return None
+    pass
 
 
 days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -127,77 +111,13 @@ timezone_re = re.compile(r"^([-+])?(\d\d?):?(\d\d)?$")
 
 
 def offset_from_tz_string(tz):
-    offset = None
-    if tz in UTC_ZONES:
-        offset = 0
-    else:
-        m = timezone_re.search(tz)
-        if m:
-            offset = 3600 * int(m.group(2))
-            if m.group(3):
-                offset = offset + 60 * int(m.group(3))
-            if m.group(1) == '-':
-                offset = -offset
-    return offset
+    pass
 
 
 def _str2time(day, mon, yr, hr, min, sec, tz):
     # translate month name to number
     # month numbers start with 1 (January)
-    try:
-        mon = months_lower.index(mon.lower()) + 1
-    except ValueError:
-        # maybe it's already a number
-        try:
-            imon = int(mon)
-        except ValueError:
-            return None
-        if 1 <= imon <= 12:
-            mon = imon
-        else:
-            return None
-
-    # make sure clock elements are defined
-    if hr is None:
-        hr = 0
-    if min is None:
-        min = 0
-    if sec is None:
-        sec = 0
-
-    yr = int(yr)
-    day = int(day)
-    hr = int(hr)
-    min = int(min)
-    sec = int(sec)
-
-    if yr < 1000:
-        # find "obvious" year
-        cur_yr = time.localtime(time.time())[0]
-        m = cur_yr % 100
-        tmp = yr
-        yr = yr + cur_yr - m
-        m = m - tmp
-        if abs(m) > 50:
-            if m > 0:
-                yr = yr + 100
-            else:
-                yr = yr - 100
-
-    # convert UTC time tuple to seconds since epoch (not timezone-adjusted)
-    t = my_timegm((yr, mon, day, hr, min, sec, tz))
-
-    if t is not None:
-        # adjust time using timezone string, to get absolute time since epoch
-        if tz is None:
-            tz = "UTC"
-        tz = tz.upper()
-        offset = offset_from_tz_string(tz)
-        if offset is None:
-            return None
-        t = t - offset
-
-    return t
+    pass
 
 
 strict_re = re.compile(r"^[SMTWF][a-z][a-z], (\d\d) ([JFMASOND][a-z][a-z]) "
@@ -252,32 +172,7 @@ def http2time(text):
     century that makes the year closest to the current date.
 
     """
-    # fast exit for strictly conforming string
-    m = strict_re.search(text)
-    if m:
-        g = m.groups()
-        mon = months_lower.index(g[1].lower()) + 1
-        tt = (int(g[2]), mon, int(g[0]),
-              int(g[3]), int(g[4]), float(g[5]))
-        return my_timegm(tt)
-
-    # No, we need some messy parsing...
-
-    # clean up
-    text = text.lstrip()
-    text = wkday_re.sub("", text, 1)  # Useless weekday
-
-    # tz is time zone specifier string
-    day, mon, yr, hr, min, sec, tz = [None] * 7
-
-    # loose regexp parse
-    m = loose_http_re.search(text)
-    if m is not None:
-        day, mon, yr, hr, min, sec, tz = m.groups()
-    else:
-        return None  # bad format
-
-    return _str2time(day, mon, yr, hr, min, sec, tz)
+    pass
 
 
 iso_re = re.compile(

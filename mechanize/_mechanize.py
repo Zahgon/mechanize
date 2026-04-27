@@ -36,11 +36,7 @@ class FormNotFoundError(Exception):
 
 
 def sanepathname2url(path):
-    urlpath = pathname2url(path)
-    if os.name == "nt" and urlpath.startswith("///"):
-        urlpath = urlpath[2:]
-    # XXX don't ask me about the mac...
-    return urlpath
+    pass
 
 
 class History:
@@ -54,7 +50,7 @@ class History:
         self._history = []  # LIFO
 
     def add(self, request, response):
-        self._history.append((request, response))
+        pass
 
     def back(self, n, _response):
         pass
@@ -63,10 +59,7 @@ class History:
         pass
 
     def close(self):
-        for request, response in self._history:
-            if response is not None:
-                response.close()
-        del self._history[:]
+        pass
 
     def __copy__(self):
         ans = self.__class__()
@@ -132,27 +125,7 @@ class Browser(UserAgentBase):
         Only named arguments should be passed to this constructor.
 
         """
-        self._handle_referer = True
-
-        if history is None:
-            history = History()
-        self._history = history
-
-        if request_class is None:
-            request_class = _request.Request
-
-        factory = factory_class(allow_xhtml=allow_xhtml)
-        factory.set_request_class(request_class)
-        if content_parser is not None:
-            factory.set_content_parser(content_parser)
-        self._factory = factory
-        self.request_class = request_class
-
-        self.request = None
-        self._set_response(None, False)
-
-        # do this last to avoid __getattr__ problems
-        UserAgentBase.__init__(self)
+        pass
 
     def __copy__(self):
         '''
@@ -171,22 +144,7 @@ class Browser(UserAgentBase):
         return ans
 
     def close(self):
-        UserAgentBase.close(self)
-        if self._response is not None:
-            self._response.close()
-        if self._history is not None:
-            self._history.close()
-            self._history = None
-
-        # make use after .close easy to spot
-        self.form = None
-        self.request = self._response = None
-        self.request = self.response = self.set_response = None
-        self.geturl = self.reload = self.back = None
-        self.clear_history = self.set_cookie = self.links = self.forms = None
-        self.viewing_html = self.encoding = self.title = None
-        self.select_form = self.click = self.submit = self.click_link = None
-        self.follow_link = self.find_link = None
+        pass
 
     def set_handle_referer(self, handle):
         """Set whether to add Referer header to each request."""
@@ -267,22 +225,11 @@ class Browser(UserAgentBase):
 
         This is intended mostly for HTML-preprocessing.
         """
-        self._set_response(response, True)
+        pass
 
     def _set_response(self, response, close_current):
         # sanity check, necessary but far from sufficient
-        if not (response is None or
-                (hasattr(response, "info") and hasattr(response, "geturl") and
-                 hasattr(response, "read"))):
-            raise ValueError("not a response object")
-
-        self.form = None
-        if response is not None:
-            response = _response.upgrade_response(response)
-        if close_current and self._response is not None:
-            self._response.close()
-        self._response = response
-        self._factory.set_response(response)
+        pass
 
     def visit_response(self, response, request=None):
         """Visit the response, as if it had been :meth:`open()` ed.
@@ -305,9 +252,7 @@ class Browser(UserAgentBase):
 
     def geturl(self):
         """Get URL of current document."""
-        if self._response is None:
-            raise BrowserStateError("not viewing any document")
-        return self._response.geturl()
+        pass
 
     def reload(self):
         """Reload current document, and return response object."""
@@ -423,9 +368,7 @@ class Browser(UserAgentBase):
         pass
 
     def encoding(self):
-        if self._response is None:
-            raise BrowserStateError("not viewing any document")
-        return self._factory.encoding
+        pass
 
     def title(self):
         ' Return title, or None if there is no title element in the document. '

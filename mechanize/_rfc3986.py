@@ -37,16 +37,7 @@ def clean_url(url, encoding='utf-8'):
     # - IE will return you the url in the encoding you send it
     # - Mozilla/Firefox will send you latin-1 if there's no non latin-1
     # characters in your link. It will send you utf-8 however if there are...
-    is_unicode = not isinstance(url, bytes)
-    if not is_unicode:
-        url = url.decode(encoding, "replace")
-    url = url.strip()
-    # for second param to urllib.quote(), we want URI_CHARS, minus the
-    # 'always_safe' characters that urllib.quote() never percent-encodes
-    ans = quote(url.encode(encoding), "!*'();:@&=+$,/?%#[]~")
-    if is_unicode and isinstance(ans, bytes):
-        ans = ans.decode(encoding)
-    return ans
+    pass
 
 
 def is_clean_uri(uri):
@@ -64,9 +55,7 @@ def is_clean_uri(uri):
     >>> is_clean_uri(u"http://example.com/0")
     True
     """
-    # note module re treats bytestrings as through they were decoded as latin-1
-    # so this function accepts both unicode and bytestrings
-    return not bool(BAD_URI_CHARS_RE.search(uri))
+    pass
 
 
 SPLIT_MATCH = re.compile(
@@ -75,30 +64,11 @@ SPLIT_MATCH = re.compile(
 
 def urlsplit(absolute_uri):
     """Return scheme, authority, path, query, fragment."""
-    match = SPLIT_MATCH(absolute_uri)
-    if match:
-        g = match.groups()
-        return g[1], g[3], g[4], g[6], g[8]
+    pass
 
 
 def urlunsplit(parts):
-    scheme, authority, path, query, fragment = parts
-    r = []
-    append = r.append
-    if scheme is not None:
-        append(scheme)
-        append(":")
-    if authority is not None:
-        append("//")
-        append(authority)
-    append(path)
-    if query is not None:
-        append("?")
-        append(query)
-    if fragment is not None:
-        append("#")
-        append(fragment)
-    return "".join(r)
+    pass
 
 
 def urljoin(base_uri, uri_reference):
@@ -106,8 +76,7 @@ def urljoin(base_uri, uri_reference):
 
     See RFC 3986.
     """
-    return urlunsplit(urljoin_parts(urlsplit(base_uri),
-                                    urlsplit(uri_reference)))
+    pass
 
 # oops, this doesn't do the same thing as the literal translation
 # from the RFC below
@@ -140,37 +109,7 @@ def urljoin(base_uri, uri_reference):
 
 
 def urljoin_parts(base_parts, reference_parts):
-    scheme, authority, path, query, fragment = base_parts
-    rscheme, rauthority, rpath, rquery, rfragment = reference_parts
-
-    if rscheme == scheme:
-        rscheme = None
-
-    if rscheme is not None:
-        tscheme, tauthority, tpath, tquery = (
-            rscheme, rauthority, remove_dot_segments(rpath), rquery)
-    else:
-        if rauthority is not None:
-            tauthority, tpath, tquery = (
-                rauthority, remove_dot_segments(rpath), rquery)
-        else:
-            if rpath == "":
-                tpath = path
-                if rquery is not None:
-                    tquery = rquery
-                else:
-                    tquery = query
-            else:
-                if rpath.startswith("/"):
-                    tpath = remove_dot_segments(rpath)
-                else:
-                    tpath = merge(authority, path, rpath)
-                    tpath = remove_dot_segments(tpath)
-                tquery = rquery
-            tauthority = authority
-        tscheme = scheme
-    tfragment = rfragment
-    return (tscheme, tauthority, tpath, tquery, tfragment)
+    pass
 
 # um, something *vaguely* like this is what I want, but I have to generate
 # lots of test cases first, if only to understand what it is that
@@ -193,52 +132,7 @@ def urljoin_parts(base_parts, reference_parts):
 
 
 def remove_dot_segments(path):
-    r = []
-    while path:
-        # A
-        if path.startswith("../"):
-            path = path[3:]
-            continue
-        if path.startswith("./"):
-            path = path[2:]
-            continue
-        # B
-        if path.startswith("/./"):
-            path = path[2:]
-            continue
-        if path == "/.":
-            path = "/"
-            continue
-        # C
-        if path.startswith("/../"):
-            path = path[3:]
-            if r:
-                r.pop()
-            continue
-        if path == "/..":
-            path = "/"
-            if r:
-                r.pop()
-            continue
-        # D
-        if path == ".":
-            path = path[1:]
-            continue
-        if path == "..":
-            path = path[2:]
-            continue
-        # E
-        start = 0
-        if path.startswith("/"):
-            start = 1
-        ii = path.find("/", start)
-        if ii < 0:
-            ii = None
-        r.append(path[:ii])
-        if ii is None:
-            break
-        path = path[ii:]
-    return "".join(r)
+    pass
 
 
 def merge(base_authority, base_path, ref_path):
@@ -246,12 +140,7 @@ def merge(base_authority, base_path, ref_path):
     # doesn't even take base_authority as a parameter, despite the wording in
     # the RFC suggesting otherwise.  Perhaps I'm missing some obvious identity.
     # if base_authority is not None and base_path == "":
-    if base_path == "":
-        return "/" + ref_path
-    ii = base_path.rfind("/")
-    if ii >= 0:
-        return base_path[:ii + 1] + ref_path
-    return ref_path
+    pass
 
 
 if __name__ == "__main__":

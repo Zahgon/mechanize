@@ -20,13 +20,7 @@ warn = logging.getLogger("mechanize").warning
 
 
 def as_utf8(x):
-    if isinstance(x, bytes):
-        return x
-    if not is_string(x):
-        x = unicode_type(x)
-    if isinstance(x, unicode_type):
-        x = x.encode('utf-8')
-    return x
+    pass
 
 
 class Request(_urllib2_fork.Request):
@@ -61,20 +55,7 @@ class Request(_urllib2_fork.Request):
         # contain characters which are legal), because that might break working
         # code (who knows what bytes some servers want to see, especially with
         # browser plugins for internationalised URIs).
-        if not _rfc3986.is_clean_uri(url):
-            warn("url argument is not a URI "
-                 "(contains illegal characters) %r" % url)
-        if isinstance(data, dict):
-            data = {as_utf8(k): as_utf8(v) for k, v in iteritems(data)}
-            data = urlencode(data)
-            data = data or None
-            if data and method == 'GET':
-                url += ('&' if '?' in url else '?') + data
-                data = None
-        _urllib2_fork.Request.__init__(self, url, data, headers, method=method)
-        self.selector = None
-        self.visit = visit
-        self.timeout = timeout
+        pass
 
     def __str__(self):
         return "<Request for %s>" % self.get_full_url()

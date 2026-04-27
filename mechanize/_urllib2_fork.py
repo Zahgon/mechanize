@@ -65,9 +65,7 @@ def sha1_digest(data):
 
 
 def md5_digest(data):
-    if not isinstance(data, bytes):
-        data = data.encode('utf-8')
-    return hashlib.md5(data).hexdigest()
+    pass
 
 
 if platform.python_implementation() == 'PyPy':
@@ -88,15 +86,11 @@ _opener = None
 
 
 def urlopen(url, data=None):
-    global _opener
-    if _opener is None:
-        _opener = build_opener()
-    return _opener._open(url, data)
+    pass
 
 
 def install_opener(opener):
-    global _opener
-    _opener = opener
+    pass
 
 
 # copied from cookielib.py
@@ -110,14 +104,7 @@ def request_host(request):
     comparison.
 
     """
-    url = request.get_full_url()
-    host = urlparse(url)[1]
-    if host == "":
-        host = request.get_header("Host", "")
-
-    # remove port, if present
-    host = _cut_port_re.sub("", host, 1)
-    return host.lower()
+    pass
 
 
 PERCENT_RE = re.compile(b"%[a-fA-F0-9]{2}")
@@ -130,42 +117,11 @@ QUERY_CHARS = FRAGMENT_CHARS = PATH_CHARS | {ord(b"?")}
 
 
 def fix_invalid_bytes_in_url_component(component, allowed_chars=PATH_CHARS):
-    if not component:
-        return component
-    is_bytes = isinstance(component, bytes)
-    if not is_bytes:
-        component = component.encode('utf-8', 'surrogatepass')
-    percent_encodings = PERCENT_RE.findall(component)
-    for enc in percent_encodings:
-        if not enc.isupper():
-            component = component.replace(enc, enc.upper())
-    is_percent_encoded = len(percent_encodings) == component.count(b"%")
-    encoded_component = bytearray()
-    percent = ord('%')
-    for byte_ord in bytearray(component):
-        if (is_percent_encoded and byte_ord == percent) or (byte_ord < 128 and byte_ord in allowed_chars):
-            encoded_component.append(byte_ord)
-            continue
-        encoded_component.extend(b"%" + (hex(byte_ord)[2:].encode().zfill(2).upper()))
-    encoded_component = bytes(encoded_component)
-    if not is_bytes:
-        encoded_component = encoded_component.decode('utf-8')
-    return encoded_component
+    pass
 
 
 def normalize_url(url):
-    parsed = urlparse(url)
-    netloc = parsed.netloc
-    if not isinstance(netloc, bytes) and netloc:
-        def safe_encode(label):
-            pass
-        netloc = u'.'.join(map(safe_encode, netloc.split(u'.')))
-
-    return urlunparse(parsed._replace(
-        path=fix_invalid_bytes_in_url_component(parsed.path), netloc=netloc,
-        query=fix_invalid_bytes_in_url_component(parsed.query, QUERY_CHARS),
-        fragment=fix_invalid_bytes_in_url_component(parsed.fragment, FRAGMENT_CHARS),
-    ))
+    pass
 
 
 class Request:
@@ -173,26 +129,7 @@ class Request:
     def __init__(self, url, data=None, headers={},
                  origin_req_host=None, unverifiable=False, method=None):
         # unwrap('<URL:type://host/path>') --> 'type://host/path'
-        self.__original = normalize_url(unwrap(url))
-        self.type = None
-        self._method = method and str(method)
-        # self.__r_type is what's left after doing the splittype
-        self.host = None
-        self.port = None
-        self._tunnel_host = None
-        self.data = data
-        self.headers = OrderedDict()
-        for key, value in iteritems(headers):
-            self.add_header(key, value)
-        self.unredirected_hdrs = OrderedDict()
-        if origin_req_host is None:
-            origin_req_host = request_host(self)
-        self.origin_req_host = origin_req_host
-        self.unverifiable = unverifiable
-        try:
-            self.get_host()  # in py3 cookiejar expect self.host to be not None
-        except Exception:
-            self.host = None
+        pass
 
     def __getattr__(self, attr):
         # XXX this is a fallback mechanism to guard against these
@@ -214,7 +151,7 @@ class Request:
 
     def set_data(self, data):
         ' Set the data (a bytestring) to be sent with this request '
-        self.data = data
+        pass
     add_data = set_data
 
     def has_data(self):
@@ -223,10 +160,10 @@ class Request:
 
     def get_data(self):
         ' The data to be sent with this request '
-        return self.data
+        pass
 
     def get_full_url(self):
-        return self.__original
+        pass
 
     @property
     def full_url(self):
@@ -236,31 +173,16 @@ class Request:
         pass
 
     def get_type(self):
-        if self.type is None:
-            self.type, self.__r_type = splittype(self.__original)
-            if self.type is None:
-                raise ValueError("unknown url type: %s" % self.__original)
-        return self.type
+        pass
 
     def get_host(self):
-        if self.host is None:
-            self.host, self.__r_host = splithost(self.__r_type)
-            if self.host:
-                self.host = unquote(self.host)
-        return self.host
+        pass
 
     def get_selector(self):
         pass
 
     def set_proxy(self, host, type):
-        orig_host = self.get_host()
-        if self.get_type() == 'https' and not self._tunnel_host:
-            self._tunnel_host = orig_host
-        else:
-            self.type = type
-            self.__r_host = self.__original
-
-        self.host = host
+        pass
 
     def has_proxy(self):
         """Private method."""
@@ -275,12 +197,7 @@ class Request:
     def add_header(self, key, val=None):
         ''' Add the specified header, replacing existing one, if needed. If val
         is None, remove the header. '''
-        # useful for something like authentication
-        key = normalize_header_name(key)
-        if val is None:
-            self.headers.pop(key, None)
-        else:
-            self.headers[key] = val
+        pass
 
     def add_unredirected_header(self, key, val):
         ''' Same as :meth:`add_header()` except that this header will not
@@ -294,10 +211,7 @@ class Request:
     def get_header(self, header_name, default=None):
         ''' Get the value of the specified header. If absent, return `default`
         '''
-        header_name = normalize_header_name(header_name)
-        return self.headers.get(
-            header_name,
-            self.unredirected_hdrs.get(header_name, default))
+        pass
 
     def header_items(self):
         ''' Get a copy of all headers for this request as a list of 2-tuples
@@ -319,53 +233,7 @@ class OpenerDirector(object):
         self.process_request = {}
 
     def add_handler(self, handler):
-        if not hasattr(handler, "add_parent"):
-            raise TypeError("expected BaseHandler instance, got %r" %
-                            type(handler))
-
-        added = False
-        for meth in dir(handler):
-            if meth in ["redirect_request", "do_open", "proxy_open"]:
-                # oops, coincidental match
-                continue
-
-            i = meth.find("_")
-            protocol = meth[:i]
-            condition = meth[i + 1:]
-
-            if condition.startswith("error"):
-                j = condition.find("_") + i + 1
-                kind = meth[j + 1:]
-                try:
-                    kind = int(kind)
-                except ValueError:
-                    pass
-                lookup = self.handle_error.get(protocol, {})
-                self.handle_error[protocol] = lookup
-            elif condition == "open":
-                kind = protocol
-                lookup = self.handle_open
-            elif condition == "response":
-                kind = protocol
-                lookup = self.process_response
-            elif condition == "request":
-                kind = protocol
-                lookup = self.process_request
-            else:
-                continue
-
-            handlers = lookup.setdefault(kind, [])
-            if handlers:
-                bisect.insort(handlers, handler)
-            else:
-                handlers.append(handler)
-            added = True
-
-        if added:
-            # the handlers must work in an specific order, the order
-            # is specified in a Handler attribute
-            bisect.insort(self.handlers, handler)
-            handler.add_parent(self)
+        pass
 
     def close(self):
         # Only exists for backwards compatibility.
@@ -375,28 +243,10 @@ class OpenerDirector(object):
         # Handlers raise an exception if no one else should try to handle
         # the request, or return None if they can't but another handler
         # could.  Otherwise, they return the response.
-        handlers = chain.get(kind, ())
-        for handler in handlers:
-            func = getattr(handler, meth_name)
-
-            result = func(*args)
-            if result is not None:
-                return result
+        pass
 
     def _open(self, req, data=None):
-        result = self._call_chain(self.handle_open, 'default',
-                                  'default_open', req)
-        if result:
-            return result
-
-        protocol = req.get_type()
-        result = self._call_chain(self.handle_open, protocol, protocol +
-                                  '_open', req)
-        if result:
-            return result
-
-        return self._call_chain(self.handle_open, 'unknown',
-                                'unknown_open', req)
+        pass
 
     def error(self, proto, *args):
         pass
@@ -415,37 +265,14 @@ def build_opener(*handlers):
     If any of the handlers passed as arguments are subclasses of the
     default handlers, the default handlers will not be used.
     """
-    opener = OpenerDirector()
-    default_classes = [ProxyHandler, UnknownHandler, HTTPHandler,
-                       HTTPDefaultErrorHandler, HTTPRedirectHandler,
-                       FTPHandler, FileHandler, HTTPErrorProcessor]
-    default_classes.append(HTTPSHandler)
-    skip = set()
-    for klass in default_classes:
-        for check in handlers:
-            if is_class(check):
-                if issubclass(check, klass):
-                    skip.add(klass)
-            elif isinstance(check, klass):
-                skip.add(klass)
-    for klass in skip:
-        default_classes.remove(klass)
-
-    for klass in default_classes:
-        opener.add_handler(klass())
-
-    for h in handlers:
-        if is_class(h):
-            h = h()
-        opener.add_handler(h)
-    return opener
+    pass
 
 
 class BaseHandler:
     handler_order = 500
 
     def add_parent(self, parent):
-        self.parent = parent
+        pass
 
     def close(self):
         # Only exists for backwards compatibility
@@ -598,18 +425,7 @@ class ProxyHandler(BaseHandler):
     handler_order = 100
 
     def __init__(self, proxies=None, proxy_bypass=None):
-        if proxies is None:
-            proxies = getproxies()
-
-        assert is_mapping(proxies), "proxies must be a mapping"
-        self.proxies = proxies
-        for type, url in iteritems(proxies):
-            setattr(self, '%s_open' % type,
-                    lambda r, proxy=url, type=type, meth=self.proxy_open:
-                    meth(r, proxy, type))
-        if proxy_bypass is None:
-            proxy_bypass = urllib_proxy_bypass
-        self._proxy_bypass = proxy_bypass
+        pass
 
     def proxy_open(self, req, proxy, type):
         pass
@@ -675,10 +491,7 @@ class AbstractBasicAuthHandler:
     # production).
 
     def __init__(self, password_mgr=None):
-        if password_mgr is None:
-            password_mgr = HTTPPasswordMgr()
-        self.passwd = password_mgr
-        self.add_password = self.passwd.add_password
+        pass
 
     def http_error_auth_reqed(self, authreq, host, req, headers):
         # host may be an authority (without userinfo) or a URL with an
@@ -734,13 +547,7 @@ class AbstractDigestAuthHandler:
     # XXX qop="auth-int" supports is shaky
 
     def __init__(self, passwd=None):
-        if passwd is None:
-            passwd = HTTPPasswordMgr()
-        self.passwd = passwd
-        self.add_password = self.passwd.add_password
-        self.retried = 0
-        self.nonce_count = 0
-        self.last_nonce = None
+        pass
 
     def reset_retry_count(self):
         pass
@@ -841,9 +648,7 @@ class HTTPHandler(AbstractHTTPHandler):
 class HTTPSHandler(AbstractHTTPHandler):
 
     def __init__(self, client_cert_manager=None):
-        AbstractHTTPHandler.__init__(self)
-        self.client_cert_manager = client_cert_manager
-        self.ssl_context = None
+        pass
 
     def https_open(self, req):
         pass
@@ -867,9 +672,7 @@ class HTTPCookieProcessor(BaseHandler):
     """
 
     def __init__(self, cookiejar=None):
-        if cookiejar is None:
-            cookiejar = CookieJar()
-        self.cookiejar = cookiejar
+        pass
 
     def http_request(self, request):
         pass

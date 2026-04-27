@@ -19,7 +19,7 @@ __all__ = [
 
 def effective_request_host(request):
     """Return the effective request-host, as defined by RFC 2965."""
-    return eff_request_host(request)[1]
+    pass
 
 
 def request_is_unverifiable(request):

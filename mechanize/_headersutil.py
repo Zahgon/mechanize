@@ -20,13 +20,7 @@ from .polyglot import is_string
 
 
 def is_html_file_extension(url, allow_xhtml):
-    if url is None:
-        return False
-    ext = os.path.splitext(_rfc3986.urlsplit(url)[2])[1]
-    html_exts = [".htm", ".html"]
-    if allow_xhtml:
-        html_exts += [".xhtml"]
-    return ext in html_exts
+    pass
 
 
 def is_html(ct_headers, url=None, allow_xhtml=False):
@@ -35,29 +29,12 @@ def is_html(ct_headers, url=None, allow_xhtml=False):
     url: Response URL
 
     """
-    if not ct_headers:
-        return is_html_file_extension(url, allow_xhtml)
-    headers = split_header_words(ct_headers)
-    if len(headers) < 1:
-        return is_html_file_extension(url, allow_xhtml)
-    first_header = headers[0]
-    first_parameter = first_header[0]
-    ct = first_parameter[0]
-    html_types = ["text/html"]
-    if allow_xhtml:
-        html_types += [
-            "text/xhtml",
-            "text/xml",
-            "application/xml",
-            "application/xhtml+xml",
-        ]
-    return ct in html_types
+    pass
 
 
 def unmatched(match):
     """Return unmatched part of re.Match object."""
-    start, end = match.span(0)
-    return match.string[:start] + match.string[end:]
+    pass
 
 
 token_re = re.compile(r"^\s*([^=\s;,]+)")
@@ -111,47 +88,7 @@ def split_header_words(header_values):
     [[('Basic', None), ('realm', '"foobar"')]]
 
     """
-    assert not is_string(header_values)
-    result = []
-    for text in header_values:
-        orig_text = text
-        pairs = []
-        while text:
-            m = token_re.search(text)
-            if m:
-                text = unmatched(m)
-                name = m.group(1)
-                m = quoted_value_re.search(text)
-                if m:  # quoted value
-                    text = unmatched(m)
-                    value = m.group(1)
-                    value = escape_re.sub(r"\1", value)
-                else:
-                    m = value_re.search(text)
-                    if m:  # unquoted value
-                        text = unmatched(m)
-                        value = m.group(1)
-                        value = value.rstrip()
-                    else:
-                        # no value, a lone token
-                        value = None
-                pairs.append((name, value))
-            elif text.lstrip().startswith(","):
-                # concatenated headers, as per RFC 2616 section 4.2
-                text = text.lstrip()[1:]
-                if pairs:
-                    result.append(pairs)
-                pairs = []
-            else:
-                # skip junk
-                non_junk, nr_junk_chars = re.subn(r"^[=\s;]*", "", text)
-                assert nr_junk_chars > 0, (
-                    "split_header_words bug: '%s', '%s', %s" %
-                    (orig_text, text, pairs))
-                text = non_junk
-        if pairs:
-            result.append(pairs)
-    return result
+    pass
 
 
 join_escape_re = re.compile(r"([\"\\])")
@@ -199,19 +136,11 @@ uppercase_headers = {'WWW', 'TE'}
 
 
 def normalize_header_name(name):
-    parts = [x.capitalize() for x in name.split('-')]
-    q = parts[0].upper()
-    if q in uppercase_headers:
-        parts[0] = q
-    if len(parts) == 3 and parts[1] == 'Websocket':
-        parts[1] = 'WebSocket'
-    return '-'.join(parts)
+    pass
 
 
 def _test():
-    import doctest
-    from . import _headersutil
-    return doctest.testmod(_headersutil)
+    pass
 
 
 if __name__ == "__main__":

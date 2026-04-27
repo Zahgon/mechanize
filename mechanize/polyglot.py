@@ -35,22 +35,22 @@ if is_py2:
     from future_builtins import map  # noqa
 
     def is_string(x):
-        return isinstance(x, basestring)
+        pass
 
     def iteritems(x):
-        return x.iteritems()
+        pass
 
     def itervalues(x):
-        return x.itervalues()
+        pass
 
     def is_class(obj):
-        return isinstance(obj, (types.ClassType, type))
+        pass
 
     def raise_with_traceback(exc):
-        exec('raise exc, None, sys.exc_info()[2]')
+        pass
 
     def is_mapping(x):
-        return isinstance(x, collections.Mapping)
+        pass
 
     codepoint_to_chr = unichr
     unicode_type = unicode
@@ -81,23 +81,22 @@ else:
     from io import StringIO
 
     def splitattr(url):
-        words = url.split(';')
-        return words[0], words[1:]
+        pass
 
     def is_string(x):
-        return isinstance(x, str)
+        pass
 
     def iteritems(x):
-        return x.items()
+        pass
 
     def itervalues(x):
-        return x.values()
+        pass
 
     def is_class(obj):
-        return isinstance(obj, type)
+        pass
 
     def raise_with_traceback(exc):
-        raise exc.with_traceback(sys.exc_info()[2])
+        pass
 
     codepoint_to_chr = chr
     unicode_type = str
@@ -105,7 +104,7 @@ else:
 
     # Legacy code expects HTTPMessage.getheaders()
     def getheaders(self, name):
-        return self.get_all(name, failobj=[])
+        pass
     HTTPMessage.getheaders = getheaders
 
     # We want __getitem__ to return the last header not the first
@@ -119,85 +118,47 @@ else:
     HTTPMessage.getsubtype = HTTPMessage.get_content_subtype
 
     def is_mapping(x):
-        return isinstance(x, collections.abc.Mapping)
+        pass
 
     def create_response_info(fp):
-        return parse_headers(fp)
+        pass
 
     def urlopen(*a, **kw):
-        proxies = kw.pop('proxies', None)
-        if proxies is None:
-            return _urlopen(*a, **kw)
-        r = Request(a[0])
-        for k, v in proxies.items():
-            r.set_proxy(v, k)
-        return _urlopen(r, *a[1:], **kw)
+        pass
 
     _hostprog = None
 
     def urllib_splithost(url):
         """splithost('//host[:port]/path') --> 'host[:port]', '/path'."""
-        global _hostprog
-        if _hostprog is None:
-            _hostprog = re.compile('//([^/#?]*)(.*)', re.DOTALL)
-
-        match = _hostprog.match(url)
-        if match:
-            host_port, path = match.groups()
-            if path and path[0] != '/':
-                path = '/' + path
-            return host_port, path
-        return None, url
+        pass
 
     _typeprog = None
 
     def splittype(url):
         """splittype('type:opaquestring') --> 'type', 'opaquestring'."""
-        global _typeprog
-        if _typeprog is None:
-            _typeprog = re.compile('([^/:]+):(.*)', re.DOTALL)
-
-        match = _typeprog.match(url)
-        if match:
-            scheme, data = match.groups()
-            return scheme.lower(), data
-        return None, url
+        pass
 
     def splituser(host):
         """splituser('user[:passwd]@host[:port]') --> 'user[:passwd]', 'host[:port]'."""
-        user, delim, host = host.rpartition('@')
-        return (user if delim else None), host
+        pass
 
     def splitpasswd(user):
         """splitpasswd('user:passwd') -> 'user', 'passwd'."""
-        user, delim, passwd = user.partition(':')
-        return user, (passwd if delim else None)
+        pass
 
     _portprog = None
 
     def splitport(host):
         """splitport('host:port') --> 'host', 'port'."""
-        global _portprog
-        if _portprog is None:
-            _portprog = re.compile('(.*):([0-9]*)$', re.DOTALL)
-
-        match = _portprog.match(host)
-        if match:
-            host, port = match.groups()
-            if port:
-                return host, port
-        return host, None
+        pass
 
     def splitvalue(attr):
         """splitvalue('attr=value') --> 'attr', 'value'."""
-        attr, delim, value = attr.partition('=')
-        return attr, (value if delim else None)
+        pass
 
 
 def as_unicode(x, encoding='utf-8', errors='strict'):
-    if isinstance(x, bytes):
-        x = x.decode('utf-8', errors=errors)
-    return x
+    pass
 
 
 if False:

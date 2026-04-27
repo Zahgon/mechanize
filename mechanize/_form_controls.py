@@ -19,9 +19,7 @@ else:
     class StringIO(BytesIO):
 
         def write(self, x):
-            if isinstance(x, str):
-                x = x.encode('utf-8')
-            BytesIO.write(self, x)
+            pass
 
 
 class Missing:
@@ -56,17 +54,11 @@ def deprecation(message, stack_offset=0):
 
 
 def compress_whitespace(text):
-    return re.sub(r'\s+', ' ', text or '').strip()
+    pass
 
 
 def isstringlike(x):
-    if isinstance(x, (bytes, unicode_type)):
-        return True
-    try:
-        x + ""
-        return True
-    except Exception:
-        return False
+    pass
 
 
 def choose_boundary():
@@ -207,9 +199,7 @@ class Label:
 
 
 def _get_label(attrs):
-    text = attrs.get("__label")
-    if text is not None:
-        return Label(text)
+    pass
 
 
 class Control:
@@ -273,20 +263,19 @@ class Control:
         attrs: HTML attributes of control's HTML element
 
         """
-        raise NotImplementedError()
+        pass
 
     def add_to_form(self, form):
-        self._form = form
-        form.controls.append(self)
+        pass
 
     def fixup(self):
         pass
 
     def is_of_kind(self, kind):
-        raise NotImplementedError()
+        pass
 
     def clear(self):
-        raise NotImplementedError()
+        pass
 
     def __getattr__(self, name):
         raise NotImplementedError()
@@ -306,7 +295,7 @@ class Control:
         controls are involved.
 
         """
-        raise NotImplementedError()
+        pass
 
     def _write_mime_data(self, mw, name, value):
         """Write data for a subitem of this control to a MimeWriter."""
@@ -323,12 +312,7 @@ class Control:
         that appear in the HTML.
 
         """
-        res = []
-        if self._label:
-            res.append(self._label)
-        if self.id:
-            res.extend(self._form._id_to_labels.get(self.id, ()))
-        return res
+        pass
 
 
 # ---------------------------------------------------
@@ -418,11 +402,7 @@ class TextControl(ScalarControl):
     """
 
     def __init__(self, type, name, attrs, index=None):
-        ScalarControl.__init__(self, type, name, attrs, index)
-        if self.type == "hidden":
-            self.readonly = True
-        if self._value is None:
-            self._value = ""
+        pass
 
     def is_of_kind(self, kind):
         pass
@@ -439,9 +419,7 @@ class FileControl(ScalarControl):
     """
 
     def __init__(self, type, name, attrs, index=None):
-        ScalarControl.__init__(self, type, name, attrs, index)
-        self._value = None
-        self._upload_data = []
+        pass
 
     def is_of_kind(self, kind):
         pass
@@ -519,8 +497,7 @@ class IgnoreControl(ScalarControl):
     """
 
     def __init__(self, type, name, attrs, index=None):
-        ScalarControl.__init__(self, type, name, attrs, index)
-        self._value = None
+        pass
 
     def is_of_kind(self, kind):
         pass
@@ -543,18 +520,7 @@ class IgnoreControl(ScalarControl):
 
 class Item:
     def __init__(self, control, attrs, index=None):
-        label = _get_label(attrs)
-        self.__dict__.update({
-            "name": attrs["value"],
-            "_labels": label and [label] or [],
-            "attrs": attrs,
-            "_control": control,
-            "disabled": 'disabled' in attrs,
-            "_selected": False,
-            "id": attrs.get("id"),
-            "_index": index,
-        })
-        control.items.append(self)
+        pass
 
     def get_labels(self):
         """Return all labels (Label instances) for this item.
@@ -573,11 +539,7 @@ class Item:
         the sake of consistency and completeness.
 
         """
-        res = []
-        res.extend(self._labels)
-        if self.id:
-            res.extend(self._control._form._id_to_labels.get(self.id, ()))
-        return res
+        pass
 
     def __getattr__(self, name):
         if name == "selected":
@@ -610,19 +572,7 @@ class Item:
 
 
 def disambiguate(items, nr, **kwds):
-    msgs = []
-    for key, value in iteritems(kwds):
-        msgs.append("%s=%r" % (key, value))
-    msg = " ".join(msgs)
-    if not items:
-        raise ItemNotFoundError(msg)
-    if nr is None:
-        if len(items) > 1:
-            raise AmbiguityError(msg)
-        nr = 0
-    if len(items) <= nr:
-        raise ItemNotFoundError(msg)
-    return items[nr]
+    pass
 
 
 class ListControl(Control):
@@ -715,26 +665,7 @@ class ListControl(Control):
          present
 
         """
-        if not called_as_base_class:
-            raise NotImplementedError()
-
-        self.__dict__["type"] = type.lower()
-        self.__dict__["name"] = name
-        self._value = attrs.get("value")
-        self.disabled = False
-        self.readonly = False
-        self.id = attrs.get("id")
-        self._closed = False
-
-        # As Controls are merged in with .merge_control(), self.attrs will
-        # refer to each Control in turn -- always the most recently merged
-        # control.  Each merged-in Control instance corresponds to a single
-        # list item: see ListControl.__doc__.:
-        self.items = []
-        self._form = None
-
-        self._select_default = select_default
-        self._clicked = False
+        pass
 
     def clear(self):
         pass
@@ -749,28 +680,7 @@ class ListControl(Control):
         For argument docs, see the docstring for .get()
 
         """
-        if name is not None and not isstringlike(name):
-            raise TypeError("item name must be string-like")
-        if label is not None and not isstringlike(label):
-            raise TypeError("item label must be string-like")
-        if id is not None and not isstringlike(id):
-            raise TypeError("item id must be string-like")
-        items = []  # order is important
-        for o in self.items:
-            if exclude_disabled and o.disabled:
-                continue
-            if name is not None and o.name != name:
-                continue
-            if label is not None:
-                for l in o.get_labels():
-                    if label in l.text:
-                        break
-                else:
-                    continue
-            if id is not None and o.id != id:
-                continue
-            items.append(o)
-        return items
+        pass
 
     def get(self,
             name=None,
@@ -803,8 +713,7 @@ class ListControl(Control):
         Optionally excludes disabled items.
 
         """
-        items = self.get_items(name, label, id, exclude_disabled)
-        return disambiguate(items, nr, name=name, label=label, id=id)
+        pass
 
     def _get(self, name, by_label=False, nr=None, exclude_disabled=False):
         # strictly for use by deprecated methods
@@ -900,31 +809,13 @@ class ListControl(Control):
         pass
 
     def close_control(self):
-        self._closed = True
+        pass
 
     def add_to_form(self, form):
-        assert self._form is None or form == self._form, (
-            "can't add control to more than one form")
-        self._form = form
-        if self.name is None:
-            # always count nameless elements as separate controls
-            Control.add_to_form(self, form)
-        else:
-            for ii in range(len(form.controls) - 1, -1, -1):
-                control = form.controls[ii]
-                if control.name == self.name and control.type == self.type:
-                    if control._closed:
-                        Control.add_to_form(self, form)
-                    else:
-                        control.merge_control(self)
-                    break
-            else:
-                Control.add_to_form(self, form)
+        pass
 
     def merge_control(self, control):
-        assert bool(control.multiple) == bool(self.multiple)
-        # usually, isinstance(control, self.__class__)
-        self.items.extend(control.items)
+        pass
 
     def fixup(self):
         """
@@ -934,33 +825,7 @@ class ListControl(Control):
         reason this is required.
 
         """
-        # Need to set default selection where no item was indicated as being
-        # selected by the HTML:
-
-        # CHECKBOX:
-        #  Nothing should be selected.
-        # SELECT/single, SELECT/multiple and RADIO:
-        #  RFC 1866 (HTML 2.0): says first item should be selected.
-        #  W3C HTML 4.01 Specification: says that client behaviour is
-        #   undefined in this case.  For RADIO, exactly one must be selected,
-        #   though which one is undefined.
-        #  Both Netscape and Microsoft Internet Explorer (IE) choose first
-        #   item for SELECT/single.  However, both IE5 and Mozilla (both 1.0
-        #   and Firebird 0.6) leave all items unselected for RADIO and
-        #   SELECT/multiple.
-
-        # Since both Netscape and IE all choose the first item for
-        # SELECT/single, we do the same.  OTOH, both Netscape and IE
-        # leave SELECT/multiple with nothing selected, in violation of RFC 1866
-        # (but not in violation of the W3C HTML 4 standard); the same is true
-        # of RADIO (which *is* in violation of the HTML 4 standard).  We follow
-        # RFC 1866 if the _select_default attribute is set, and Netscape and IE
-        # otherwise.  RFC 1866 and HTML 4 are always violated insofar as you
-        # can deselect all items in a RadioControl.
-
-        for o in self.items:
-            # set items' controls to self, now that we've merged
-            o.__dict__["_control"] = self
+        pass
 
     def __getattr__(self, name):
         if name == "value":
@@ -1055,36 +920,13 @@ class RadioControl(ListControl):
     """
 
     def __init__(self, type, name, attrs, select_default=False, index=None):
-        attrs.setdefault("value", "on")
-        ListControl.__init__(
-            self,
-            type,
-            name,
-            attrs,
-            select_default,
-            called_as_base_class=True,
-            index=index)
-        self.__dict__["multiple"] = False
-        o = Item(self, attrs, index)
-        o.__dict__["_selected"] = 'checked' in attrs
+        pass
 
     def fixup(self):
-        ListControl.fixup(self)
-        found = [o for o in self.items if o.selected and not o.disabled]
-        if not found:
-            if self._select_default:
-                for o in self.items:
-                    if not o.disabled:
-                        o.selected = True
-                        break
-        else:
-            # Ensure only one item selected.  Choose the last one,
-            # following IE and Firefox.
-            for o in found[:-1]:
-                o.selected = False
+        pass
 
     def get_labels(self):
-        return []
+        pass
 
 
 class CheckboxControl(ListControl):
@@ -1096,21 +938,10 @@ class CheckboxControl(ListControl):
     """
 
     def __init__(self, type, name, attrs, select_default=False, index=None):
-        attrs.setdefault("value", "on")
-        ListControl.__init__(
-            self,
-            type,
-            name,
-            attrs,
-            select_default,
-            called_as_base_class=True,
-            index=index)
-        self.__dict__["multiple"] = True
-        o = Item(self, attrs, index)
-        o.__dict__["_selected"] = 'checked' in attrs
+        pass
 
     def get_labels(self):
-        return []
+        pass
 
 
 class SelectControl(ListControl):
@@ -1173,65 +1004,10 @@ class SelectControl(ListControl):
     def __init__(self, type, name, attrs, select_default=False, index=None):
         # fish out the SELECT HTML attributes from the OPTION HTML attributes
         # dictionary
-        self.attrs = dict(attrs["__select"])
-        self.__dict__["_label"] = _get_label(self.attrs)
-        self.__dict__["id"] = self.attrs.get("id")
-        self.__dict__["multiple"] = 'multiple' in self.attrs
-        # the majority of the contents, label, and value dance already happened
-        contents = attrs.get("contents")
-        attrs = dict(attrs)
-        del attrs["__select"]
-
-        ListControl.__init__(
-            self,
-            type,
-            name,
-            self.attrs,
-            select_default,
-            called_as_base_class=True,
-            index=index)
-        self.disabled = 'disabled' in self.attrs
-        self.readonly = 'readonly' in self.attrs
-        if 'value' in attrs:
-            # otherwise it is a marker 'select started' token
-            o = Item(self, attrs, index)
-            o.__dict__["_selected"] = 'selected' in attrs
-            # add 'label' label and contents label, if different.  If both are
-            # provided, the 'label' label is used for display in HTML
-            # 4.0-compliant browsers (and any lower spec? not sure) while the
-            # contents are used for display in older or less-compliant
-            # browsers.  We make label objects for both, if the values are
-            # different.
-            label = attrs.get("label")
-            if label:
-                o._labels.append(Label(label))
-                if contents and contents != label:
-                    o._labels.append(Label(contents))
-            elif contents:
-                o._labels.append(Label(contents))
+        pass
 
     def fixup(self):
-        ListControl.fixup(self)
-        # Firefox doesn't exclude disabled items from those considered here
-        # (i.e. from 'found', for both branches of the if below).  Note that
-        # IE6 doesn't support the disabled attribute on OPTIONs at all.
-        found = [o for o in self.items if o.selected]
-        if not found:
-            if not self.multiple or self._select_default:
-                for o in self.items:
-                    if not o.disabled:
-                        was_disabled = self.disabled
-                        self.disabled = False
-                        try:
-                            o.selected = True
-                        finally:
-                            o.disabled = was_disabled
-                        break
-        elif not self.multiple:
-            # Ensure only one item selected.  Choose the last one,
-            # following IE and Firefox.
-            for o in found[:-1]:
-                o.selected = False
+        pass
 
 
 # ---------------------------------------------------
@@ -1245,20 +1021,10 @@ class SubmitControl(ScalarControl):
     """
 
     def __init__(self, type, name, attrs, index=None):
-        ScalarControl.__init__(self, type, name, attrs, index)
-        # IE5 defaults SUBMIT value to "Submit Query"; Firebird 0.6 leaves it
-        # blank, Konqueror 3.1 defaults to "Submit".  HTML spec. doesn't seem
-        # to define this.
-        if self.value is None:
-            self.__dict__['_value'] = ""
-        self.readonly = True
+        pass
 
     def get_labels(self):
-        res = []
-        if self.value:
-            res.append(Label(self.value))
-        res.extend(ScalarControl.get_labels(self))
-        return res
+        pass
 
     def is_of_kind(self, kind):
         pass
@@ -1282,8 +1048,7 @@ class ImageControl(SubmitControl):
     """
 
     def __init__(self, type, name, attrs, index=None):
-        SubmitControl.__init__(self, type, name, attrs, index)
-        self.readonly = False
+        pass
 
     def _totally_ordered_pairs(self):
         pass
@@ -1583,25 +1348,7 @@ class HTMLForm:
         attrs: dictionary mapping original HTML form attributes to their values
 
         """
-        self.action = action
-        self.method = method
-        self.enctype = enctype
-        self.form_encoding = encoding or 'utf-8'
-        self.name = name
-        if attrs is not None:
-            self.attrs = dict(attrs)
-        else:
-            self.attrs = {}
-        self.controls = []
-        self._request_class = request_class
-
-        # these attributes are used by zope.testbrowser
-        self._forms = forms  # this is a semi-public API!
-        self._labels = labels  # this is a semi-public API!
-        self._id_to_labels = id_to_labels  # this is a semi-public API!
-
-        self._urlunparse = urlunparse
-        self._urlparse = urlparse
+        pass
 
     def new_control(self,
                     type,
@@ -1631,30 +1378,7 @@ class HTMLForm:
             MoreFormTests.test_interspersed_controls for motivation)
 
         """
-        type = type.lower()
-        klass = self.type2class.get(type)
-        if klass is None:
-            if ignore_unknown:
-                klass = IgnoreControl
-            else:
-                klass = TextControl
-
-        a = dict(attrs)
-        if issubclass(klass, ListControl):
-            control = klass(type, name, a, select_default, index)
-        else:
-            control = klass(type, name, a, index)
-
-        if type == "select" and len(attrs) == 1:
-            for ii in range(len(self.controls) - 1, -1, -1):
-                ctl = self.controls[ii]
-                if ctl.type == "select":
-                    ctl.close_control()
-                    break
-
-        control.add_to_form(self)
-        control._urlparse = self._urlparse
-        control._urlunparse = self._urlunparse
+        pass
 
     def fixup(self):
         """Normalise form after all controls have been added.
@@ -1666,9 +1390,7 @@ class HTMLForm:
         added to the form.
 
         """
-        for control in self.controls:
-            control.fixup()
-            control.form_encoding = self.form_encoding
+        pass
 
 # ---------------------------------------------------
 

@@ -50,61 +50,23 @@ class HTTPEquivProcessor(BaseHandler):
 class MechanizeRobotFileParser(RobotFileParser):
 
     def __init__(self, url='', opener=None):
-        RobotFileParser.__init__(self, url)
-        self._opener = opener
-        self._timeout = _sockettimeout._GLOBAL_DEFAULT_TIMEOUT
+        pass
 
     def set_opener(self, opener=None):
-        from . import _opener
-        if opener is None:
-            opener = _opener.OpenerDirector()
-        self._opener = opener
+        pass
 
     def set_timeout(self, timeout):
         pass
 
     def read(self):
         """Reads the robots.txt URL and feeds it to the parser."""
-        if self._opener is None:
-            self.set_opener()
-        req = Request(self.url, unverifiable=True, visit=False,
-                      timeout=self._timeout)
-        try:
-            f = self._opener.open(req)
-        except HTTPError as err:
-            f = err
-        except (IOError, socket.error, OSError) as exc:
-            debug_robots("ignoring error opening %r: %s" %
-                         (self.url, exc))
-            return
-        lines = []
-        line = f.readline()
-        while line:
-            lines.append(line.strip())
-            line = f.readline()
-        status = f.code
-        if status == 401 or status == 403:
-            self.disallow_all = True
-            debug_robots("disallow all")
-        elif status >= 400:
-            self.allow_all = True
-            debug_robots("allow all")
-        elif status == 200 and lines:
-            debug_robots("parse lines")
-            if is_py2:
-                self.parse(lines)
-            else:
-                # As per: https://developers.google.com/search/docs/advanced/robots/robots_txt
-                # robots.txt must be utf-8 encoded and invalid encoding causes
-                # bytes to be ignored to be ignored
-                self.parse((as_unicode(x, errors='ignore') for x in lines))
+        pass
 
 
 class RobotExclusionError(HTTPError):
 
     def __init__(self, request, *args):
-        HTTPError.__init__(self, *args)
-        self.request = request
+        pass
 
 
 class HTTPRobotRulesProcessor(BaseHandler):

@@ -28,12 +28,7 @@ from .polyglot import HTTPError, create_response_info
 def len_of_seekable(file_):
     # this function exists because evaluation of len(file_.getvalue()) on every
     # .read() from seek_wrapper would be O(N**2) in number of .read()s
-    pos = file_.tell()
-    file_.seek(0, 2)  # to end
-    try:
-        return file_.tell()
-    finally:
-        file_.seek(pos)
+    pass
 
 
 # XXX Andrew Dalke kindly sent me a similar class in response to my request on
@@ -92,8 +87,7 @@ class seek_wrapper:
         pass
 
     def close(self):
-        self.wrapped.close()
-        self.is_closed = True
+        pass
 
     def __getattr__(self, name):
         if name == "is_closed":
@@ -117,55 +111,10 @@ class seek_wrapper:
             self.__dict__[name] = value
 
     def seek(self, offset, whence=0):
-        assert whence in [0, 1, 2]
-
-        # how much data, if any, do we need to read?
-        if whence == 2:  # 2: relative to end of *wrapped* file
-            if offset < 0:
-                raise ValueError("negative seek offset")
-            # since we don't know yet where the end of that file is, we must
-            # read everything
-            to_read = None
-        else:
-            if whence == 0:  # 0: absolute
-                if offset < 0:
-                    raise ValueError("negative seek offset")
-                dest = offset
-            else:  # 1: relative to current position
-                pos = self.__pos
-                if pos < offset:
-                    raise ValueError("seek to before start of file")
-                dest = pos + offset
-            end = len_of_seekable(self.__cache)
-            to_read = dest - end
-            if to_read < 0:
-                to_read = 0
-
-        if to_read != 0:
-            self.__cache.seek(0, 2)
-            if to_read is None:
-                assert whence == 2
-                self.__cache.write(self.wrapped.read())
-                self.read_complete = True
-                self.__pos = self.__cache.tell() - offset
-            else:
-                data = self.wrapped.read(to_read)
-                if not data:
-                    self.read_complete = True
-                else:
-                    self.__cache.write(data)
-                # Don't raise an exception even if we've seek()ed past the end
-                # of .wrapped, since fseek() doesn't complain in that case.
-                # Also like fseek(), pretend we have seek()ed past the end,
-                # i.e. not:
-                # self.__pos = self.__cache.tell()
-                # but rather:
-                self.__pos = dest
-        else:
-            self.__pos = dest
+        pass
 
     def tell(self):
-        return self.__pos
+        pass
 
     def __copy__(self):
         cpy = self.__class__(self.wrapped)
@@ -175,67 +124,13 @@ class seek_wrapper:
         return cpy
 
     def get_data(self):
-        pos = self.__pos
-        try:
-            self.seek(0)
-            return self.read(-1)
-        finally:
-            self.__pos = pos
+        pass
 
     def read(self, size=-1):
-        pos = self.__pos
-        end = len_of_seekable(self.__cache)
-        available = end - pos
-
-        # enough data already cached?
-        if size <= available and size != -1:
-            self.__cache.seek(pos)
-            self.__pos = pos + size
-            return self.__cache.read(size)
-
-        # no, so read sufficient data from wrapped file and cache it
-        self.__cache.seek(0, 2)
-        if size == -1:
-            self.__cache.write(self.wrapped.read())
-            self.read_complete = True
-        else:
-            to_read = size - available
-            assert to_read > 0
-            data = self.wrapped.read(to_read)
-            if not data:
-                self.read_complete = True
-            else:
-                self.__cache.write(data)
-        self.__cache.seek(pos)
-
-        data = self.__cache.read(size)
-        self.__pos = self.__cache.tell()
-        assert self.__pos == pos + len(data)
-        return data
+        pass
 
     def readline(self, size=-1):
-        if not self.__have_readline:
-            raise NotImplementedError("no readline method on wrapped object")
-
-        # line we're about to read might not be complete in the cache, so
-        # read another line first
-        pos = self.__pos
-        self.__cache.seek(0, 2)
-        data = self.wrapped.readline()
-        if not data:
-            self.read_complete = True
-        else:
-            self.__cache.write(data)
-        self.__cache.seek(pos)
-
-        data = self.__cache.readline()
-        if size != -1:
-            r = data[:size]
-            self.__pos = pos + size
-        else:
-            r = data
-            self.__pos = pos + len(data)
-        return r
+        pass
 
     def readlines(self, sizehint=-1):
         pass
@@ -248,13 +143,17 @@ class seek_wrapper:
         if not line:
             raise StopIteration
         return line
+
     next = __next__
 
     xreadlines = __iter__
 
     def __repr__(self):
-        return ("<%s at %s whose wrapped object = %r>" %
-                (self.__class__.__name__, hex(abs(id(self))), self.wrapped))
+        return "<%s at %s whose wrapped object = %r>" % (
+            self.__class__.__name__,
+            hex(abs(id(self))),
+            self.wrapped,
+        )
 
 
 class response_seek_wrapper(seek_wrapper):
@@ -264,8 +163,7 @@ class response_seek_wrapper(seek_wrapper):
     """
 
     def __init__(self, wrapped):
-        seek_wrapper.__init__(self, wrapped)
-        self._headers = self.wrapped.info()
+        pass
 
     def __copy__(self):
         cpy = seek_wrapper.__copy__(self)
@@ -280,38 +178,34 @@ class response_seek_wrapper(seek_wrapper):
     # wrapped object's implementation, and not HTTPError's.
 
     def info(self):
-        return self._headers
+        pass
 
     @property
     def headers(self):
         pass
 
     def geturl(self):
-        return self.wrapped.geturl()
+        pass
 
     def set_data(self, data):
-        self.seek(0)
-        self.read()
-        self.close()
-        cache = self._seek_wrapper__cache = BytesIO()
-        cache.write(data)
-        self.seek(0)
+        pass
 
 
 class eoffile:
     # file-like object that always claims to be at end-of-file...
 
     def read(self, size=-1):
-        return b""
+        pass
 
     def readline(self, size=-1):
-        return b""
+        pass
 
     def __iter__(self):
         return self
 
     def __next__(self):
         return b""
+
     next = __next__
 
     def close(self):
@@ -326,10 +220,10 @@ class eofresponse(eoffile):
         self.msg = msg
 
     def geturl(self):
-        return self._url
+        pass
 
     def info(self):
-        return self._headers
+        pass
 
     @property
     def headers(self):
@@ -361,37 +255,25 @@ class closeable_response:
     it: http://python.org/sf/1144636).
 
     """
+
     # presence of this attr indicates is useable after .close()
     closeable_response = None
 
-    def __init__(
-            self, fp, headers, url, code=200, msg='OK', http_version=None):
-        self._set_fp(fp)
-        self._headers = headers
-        self._url = url
-        self.code = code
-        self.msg = msg
-        self.http_version = http_version
+    def __init__(self, fp, headers, url, code=200, msg="OK", http_version=None):
+        pass
 
     def _set_fp(self, fp):
-        self.fp = fp
-        self.read = self.fp.read
-        self.readline = self.fp.readline
-        if hasattr(self.fp, "readlines"):
-            self.readlines = self.fp.readlines
-        if hasattr(self.fp, "fileno"):
-            self.fileno = self.fp.fileno
-        else:
-            self.fileno = lambda: None
-        self.__iter__ = self.fp.__iter__
-        self.next = partial(next, self.fp)
+        pass
 
     def __repr__(self):
-        return '<%s at %s whose fp = %r>' % (self.__class__.__name__,
-                                             hex(abs(id(self))), self.fp)
+        return "<%s at %s whose fp = %r>" % (
+            self.__class__.__name__,
+            hex(abs(id(self))),
+            self.fp,
+        )
 
     def info(self):
-        return self._headers
+        pass
 
     @property
     def headers(self):
@@ -410,36 +292,24 @@ class closeable_response:
         return self._headers[name]
 
     def get(self, name, default):
-        return self._headers.get(name)
+        pass
 
     def geturl(self):
-        return self._url
+        pass
 
     def close(self):
-        wrapped = self.fp
-        wrapped.close()
-        new_wrapped = eofresponse(self._url, self._headers, self.code,
-                                  self.msg)
-        self._set_fp(new_wrapped)
+        pass
 
 
-def test_response(data='test data',
-                  headers=(),
-                  url=None,
-                  code=200,
-                  msg="OK"):
-    return make_response(data, list(headers), url, code, msg)
+def test_response(data="test data", headers=(), url=None, code=200, msg="OK"):
+    pass
 
 
 _html_header = [("Content-type", "text/html")]
 
 
-def test_html_response(data='test data',
-                       headers=(),
-                       url=None,
-                       code=200,
-                       msg="OK"):
-    return make_response(data, list(headers) + _html_header, url, code, msg)
+def test_html_response(data="test data", headers=(), url=None, code=200, msg="OK"):
+    pass
 
 
 def make_response(data, headers, url=None, code=200, msg="OK"):
@@ -452,24 +322,14 @@ def make_response(data, headers, url=None, code=200, msg="OK"):
     msg: string response code message (e.g. "OK")
 
     """
-    mime_headers = make_headers(headers)
-    if not isinstance(data, bytes):
-        data = data.encode('utf-8')
-    r = closeable_response(BytesIO(data), mime_headers, url, code, msg)
-    return response_seek_wrapper(r)
+    pass
 
 
 def make_headers(headers):
     """
     headers: sequence of (name, value) pairs
     """
-    hdr_text = []
-    for name_value in headers:
-        hdr_text.append("%s: %s" % name_value)
-    ans = "\n".join(hdr_text)
-    if not isinstance(ans, bytes):
-        ans = ans.encode('iso-8859-1')
-    return create_response_info(BytesIO(ans))
+    pass
 
 
 # Rest of this module is especially horrible, but needed, at least until fork
@@ -479,48 +339,12 @@ def make_headers(headers):
 def get_seek_wrapper_class(response):
     # in order to wrap response objects that are also exceptions, we must
     # dynamically subclass the exception :-(((
-    if (
-            isinstance(response, HTTPError) and
-            not isinstance(response, seek_wrapper)
-    ):
-        if response.__class__.__module__ == "__builtin__":
-            exc_class_name = response.__class__.__name__
-        else:
-            exc_class_name = "%s.%s" % (response.__class__.__module__,
-                                        response.__class__.__name__)
-
-        class httperror_seek_wrapper(response_seek_wrapper,
-                                     response.__class__):
-            # this only derives from HTTPError in order to be a subclass --
-            # the HTTPError behaviour comes from delegation
-
-            _exc_class_name = exc_class_name
-
-            def __init__(self, wrapped):
-                response_seek_wrapper.__init__(self, wrapped)
-                # be compatible with undocumented HTTPError attributes :-(
-                self.hdrs = wrapped.info()
-                self.filename = wrapped.geturl()
-
-            def __repr__(self):
-                return ("<%s (%s instance) at %s "
-                        "whose wrapped object = %r>" %
-                        (self.__class__.__name__, self._exc_class_name,
-                         hex(abs(id(self))), self.wrapped))
-
-        wrapper_class = httperror_seek_wrapper
-    else:
-        wrapper_class = response_seek_wrapper
-    return wrapper_class
+    pass
+    pass
 
 
 def needs_seek_wrapper(obj):
-    return (
-            not isinstance(obj, seek_wrapper) and (
-                hasattr(obj, 'seek') or isinstance(obj, HTTPError)
-                or not hasattr(obj, 'get_data')
-                )
-            )
+    pass
 
 
 def seek_wrapped_response(response):
@@ -532,11 +356,7 @@ def seek_wrapped_response(response):
     can't be simply wrapped due to the requirement of preserving the exception
     base class).
     """
-    if needs_seek_wrapper(response):
-        wrapper_class = get_seek_wrapper_class(response)
-        response = wrapper_class(response)
-    assert hasattr(response, "get_data")
-    return response
+    pass
 
 
 def upgrade_response(response):
@@ -552,35 +372,4 @@ def upgrade_response(response):
     can't be simply wrapped due to the requirement of preserving the exception
     base class).
     """
-    wrapper_class = get_seek_wrapper_class(response)
-    if hasattr(response, "closeable_response"):
-        if needs_seek_wrapper(response):
-            response = wrapper_class(response)
-        assert hasattr(response, "get_data")
-        return copy.copy(response)
-
-    # a urllib2 handler constructed the response, i.e. the response is an
-    # urllib.addinfourl or a urllib2.HTTPError, instead of a
-    # _Util.closeable_response as returned by e.g. mechanize.HTTPHandler
-    try:
-        code = response.code
-    except AttributeError:
-        code = None
-    try:
-        msg = response.msg
-    except AttributeError:
-        msg = None
-
-    # may have already-.read() data from .seek() cache
-    data = None
-    get_data = getattr(response, "get_data", None)
-    if get_data:
-        data = get_data()
-
-    response = closeable_response(response.fp,
-                                  response.info(), response.geturl(), code,
-                                  msg)
-    response = wrapper_class(response)
-    if data:
-        response.set_data(data)
-    return response
+    pass
