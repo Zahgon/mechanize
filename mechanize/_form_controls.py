@@ -52,7 +52,7 @@ _compress_re = re.compile(r"\s+")
 
 
 def deprecation(message, stack_offset=0):
-    warnings.warn(message, DeprecationWarning, stacklevel=3 + stack_offset)
+    pass
 
 
 def compress_whitespace(text):
@@ -71,10 +71,7 @@ def isstringlike(x):
 
 def choose_boundary():
     """Return a string usable as a multipart boundary."""
-    # follow IE and firefox
-    limit = (1 << 31) - 1
-    nonce = "".join(str(random.randint(0, limit)) for i in (0, 1, 2))
-    return "-" * 27 + nonce
+    pass
 
 
 # This cut-n-pasted MimeWriter from standard library is here so can add
@@ -166,29 +163,10 @@ class MimeWriter:
         """
         prefix is ignored if add_to_http_hdrs is true.
         """
-        lines = value.split("\r\n")
-        while lines and not lines[-1]:
-            del lines[-1]
-        while lines and not lines[0]:
-            del lines[0]
-        if add_to_http_hdrs:
-            value = "".join(lines)
-            # 2.2 urllib2 doesn't normalize header case
-            self._http_hdrs.append((key.capitalize(), value))
-        else:
-            for i in range(1, len(lines)):
-                lines[i] = "    " + lines[i].strip()
-            value = "\r\n".join(lines) + "\r\n"
-            line = key.title() + ": " + value
-            if prefix:
-                self._headers.insert(0, line)
-            else:
-                self._headers.append(line)
+        pass
 
     def flushheaders(self):
-        for line in self._headers:
-            self._fp.write(line)
-        self._headers = []
+        pass
 
     def startbody(self,
                   ctype=None,
@@ -199,19 +177,7 @@ class MimeWriter:
         """
         prefix is ignored if add_to_http_hdrs is true.
         """
-        if content_type and ctype:
-            for name, value in plist:
-                ctype = ctype + ';\r\n %s=%s' % (name, value)
-            self.addheader(
-                "Content-Type",
-                ctype,
-                prefix=prefix,
-                add_to_http_hdrs=add_to_http_hdrs)
-        self.flushheaders()
-        if not add_to_http_hdrs:
-            self._fp.write("\r\n")
-        self._first_part = True
-        return self._fp
+        pass
 
     def startmultipartbody(self,
                            subtype,
@@ -220,28 +186,13 @@ class MimeWriter:
                            prefix=1,
                            add_to_http_hdrs=0,
                            content_type=1):
-        boundary = boundary or choose_boundary()
-        self._boundary.append(boundary)
-        return self.startbody(
-            "multipart/" + subtype, [("boundary", boundary)] + plist,
-            prefix=prefix,
-            add_to_http_hdrs=add_to_http_hdrs,
-            content_type=content_type)
+        pass
 
     def nextpart(self):
-        boundary = self._boundary[-1]
-        if self._first_part:
-            self._first_part = False
-        else:
-            self._fp.write("\r\n")
-        self._fp.write("--" + boundary + "\r\n")
-        return self.__class__(self._fp)
+        pass
 
     def lastpart(self):
-        if self._first_part:
-            self.nextpart()
-        boundary = self._boundary.pop()
-        self._fp.write("\r\n--" + boundary + "--\r\n")
+        pass
 
 
 class Label:
@@ -346,7 +297,7 @@ class Control:
     def pairs(self):
         """Return list of (key, value) pairs suitable for passing to urlencode.
         """
-        return [(k, v) for (i, k, v) in self._totally_ordered_pairs()]
+        pass
 
     def _totally_ordered_pairs(self):
         """Return list of (key, value, index) tuples.
@@ -359,13 +310,7 @@ class Control:
 
     def _write_mime_data(self, mw, name, value):
         """Write data for a subitem of this control to a MimeWriter."""
-        # called by HTMLForm
-        mw2 = mw.nextpart()
-        mw2.addheader(
-            "Content-Disposition", 'form-data; name="%s"' % as_unicode(name),
-            1)
-        f = mw2.startbody(prefix=0)
-        f.write(value)
+        pass
 
     def __str__(self):
         raise NotImplementedError()
@@ -439,16 +384,10 @@ class ScalarControl(Control):
             self.__dict__[name] = value
 
     def _totally_ordered_pairs(self):
-        name = self.name
-        value = self.value
-        if name is None or value is None or self.disabled:
-            return []
-        return [(self._index, name, value)]
+        pass
 
     def clear(self):
-        if self.readonly:
-            raise AttributeError("control '%s' is readonly" % self.name)
-        self.__dict__["_value"] = None
+        pass
 
     def __str__(self):
         name = self.name
@@ -486,7 +425,7 @@ class TextControl(ScalarControl):
             self._value = ""
 
     def is_of_kind(self, kind):
-        return kind == "text"
+        pass
 
 
 # ---------------------------------------------------
@@ -505,12 +444,10 @@ class FileControl(ScalarControl):
         self._upload_data = []
 
     def is_of_kind(self, kind):
-        return kind == "file"
+        pass
 
     def clear(self):
-        if self.readonly:
-            raise AttributeError("control '%s' is readonly" % self.name)
-        self._upload_data = []
+        pass
 
     def __setattr__(self, name, value):
         if name in ("value", "name", "type"):
@@ -521,23 +458,11 @@ class FileControl(ScalarControl):
     def add_file(self, file_object, content_type=None, filename=None):
         ''' Add data from the specified file to be uploaded. content_type and
         filename are sent in the HTTP headers if specified. '''
-        if not hasattr(file_object, "read"):
-            raise TypeError("file-like object must have read method")
-        if content_type is not None and not isstringlike(content_type):
-            raise TypeError("content type must be None or string-like")
-        if filename is not None and not isstringlike(filename):
-            raise TypeError("filename must be None or string-like")
-        if content_type is None:
-            if getattr(file_object, 'name', None):
-                content_type = guess_type(file_object.name)[0]
-            content_type = content_type or "application/octet-stream"
-        self._upload_data.append((file_object, content_type, filename))
+        pass
 
     def _totally_ordered_pairs(self):
         # XXX should it be successful even if unnamed?
-        if self.name is None or self.disabled:
-            return []
-        return [(self._index, self.name, "")]
+        pass
 
     # If enctype is application/x-www-form-urlencoded and there's a FILE
     # control present, what should be sent?  Strictly, it should be 'name=data'
@@ -546,37 +471,7 @@ class FileControl(ScalarControl):
     def _write_mime_data(self, mw, _name, _value):
         # called by HTMLForm
         # assert _name == self.name and _value == ''
-        if len(self._upload_data) < 2:
-            if len(self._upload_data) == 0:
-                file_object = BytesIO()
-                content_type = "application/octet-stream"
-                filename = ""
-            else:
-                file_object, content_type, filename = self._upload_data[0]
-                if filename is None:
-                    filename = ""
-            mw2 = mw.nextpart()
-            fn_part = '; filename="%s"' % filename
-            disp = 'form-data; name="%s"%s' % (self.name, fn_part)
-            mw2.addheader("Content-Disposition", disp, prefix=1)
-            fh = mw2.startbody(content_type, prefix=0)
-            fh.write(file_object.read())
-        else:
-            # multiple files
-            mw2 = mw.nextpart()
-            disp = 'form-data; name="%s"' % self.name
-            mw2.addheader("Content-Disposition", disp, prefix=1)
-            fh = mw2.startmultipartbody("mixed", prefix=0)
-            for file_object, content_type, filename in self._upload_data:
-                mw3 = mw2.nextpart()
-                if filename is None:
-                    filename = ""
-                fn_part = '; filename="%s"' % filename
-                disp = "file%s" % fn_part
-                mw3.addheader("Content-Disposition", disp, prefix=1)
-                fh2 = mw3.startbody(content_type, prefix=0)
-                fh2.write(file_object.read())
-            mw2.lastpart()
+        pass
 
     def __str__(self):
         name = self.name
@@ -628,7 +523,7 @@ class IgnoreControl(ScalarControl):
         self._value = None
 
     def is_of_kind(self, kind):
-        return False
+        pass
 
     def __setattr__(self, name, value):
         if name == "value":
@@ -842,17 +737,10 @@ class ListControl(Control):
         self._clicked = False
 
     def clear(self):
-        self.value = []
+        pass
 
     def is_of_kind(self, kind):
-        if kind == "list":
-            return True
-        elif kind == "multilist":
-            return bool(self.multiple)
-        elif kind == "singlelist":
-            return not self.multiple
-        else:
-            return False
+        pass
 
     def get_items(self, name=None, label=None, id=None,
                   exclude_disabled=False):
@@ -920,11 +808,7 @@ class ListControl(Control):
 
     def _get(self, name, by_label=False, nr=None, exclude_disabled=False):
         # strictly for use by deprecated methods
-        if by_label:
-            name, label = None, name
-        else:
-            name, label = name, None
-        return self.get(name, label, nr, exclude_disabled)
+        pass
 
     def toggle(self, name, by_label=False, nr=None):
         """Deprecated: given a name or label and optional disambiguating index
@@ -937,10 +821,7 @@ class ListControl(Control):
         raise AttributeError.
 
         """
-        deprecation(
-            "item = control.get(...); item.selected = not item.selected")
-        o = self._get(name, by_label, nr)
-        self._set_selected_state(o, not o.selected)
+        pass
 
     def set(self, selected, name, by_label=False, nr=None):
         """Deprecated: given a name or label and optional disambiguating index
@@ -953,29 +834,13 @@ class ListControl(Control):
         raise AttributeError.
 
         """
-        deprecation("control.get(...).selected = <boolean>")
-        self._set_selected_state(self._get(name, by_label, nr), selected)
+        pass
 
     def _set_selected_state(self, item, action):
         # action:
         # bool False: off
         # bool True: on
-        if self.disabled:
-            raise AttributeError("control '%s' is disabled" % self.name)
-        if self.readonly:
-            raise AttributeError("control '%s' is readonly" % self.name)
-        action == bool(action)
-        if item.disabled:
-            raise AttributeError("item is disabled")
-        if self.multiple:
-            item.__dict__["_selected"] = action
-        else:
-            if not action:
-                item.__dict__["_selected"] = False
-            else:
-                for o in self.items:
-                    o.__dict__["_selected"] = False
-                item.__dict__["_selected"] = True
+        pass
 
     def toggle_single(self, by_label=None):
         """Deprecated: toggle the selection of the single item in this control.
@@ -986,13 +851,7 @@ class ListControl(Control):
         compatibility.
 
         """
-        deprecation(
-            "control.items[0].selected = not control.items[0].selected")
-        if len(self.items) != 1:
-            raise ItemCountError("'%s' is not a single-item control" %
-                                 self.name)
-        item = self.items[0]
-        self._set_selected_state(item, not item.selected)
+        pass
 
     def set_single(self, selected, by_label=None):
         """Deprecated: set the selection of the single item in this control.
@@ -1003,16 +862,11 @@ class ListControl(Control):
         compatibility.
 
         """
-        deprecation("control.items[0].selected = <boolean>")
-        if len(self.items) != 1:
-            raise ItemCountError("'%s' is not a single-item control" %
-                                 self.name)
-        self._set_selected_state(self.items[0], selected)
+        pass
 
     def get_item_disabled(self, name, by_label=False, nr=None):
         """Get disabled state of named list item in a ListControl."""
-        deprecation("control.get(...).disabled")
-        return self._get(name, by_label, nr).disabled
+        pass
 
     def set_item_disabled(self, disabled, name, by_label=False, nr=None):
         """Set disabled state of named list item in a ListControl.
@@ -1020,8 +874,7 @@ class ListControl(Control):
         :arg disabled: boolean disabled state
 
         """
-        deprecation("control.get(...).disabled = <boolean>")
-        self._get(name, by_label, nr).disabled = disabled
+        pass
 
     def set_all_items_disabled(self, disabled):
         """Set disabled state of all list items in a ListControl.
@@ -1029,8 +882,7 @@ class ListControl(Control):
         :arg disabled: boolean disabled state
 
         """
-        for o in self.items:
-            o.disabled = disabled
+        pass
 
     def get_item_attrs(self, name, by_label=False, nr=None):
         """Return dictionary of HTML attributes for a single ListControl item.
@@ -1045,8 +897,7 @@ class ListControl(Control):
         and values are taken from the original HTML.
 
         """
-        deprecation("control.get(...).attrs")
-        return self._get(name, by_label, nr).attrs
+        pass
 
     def close_control(self):
         self._closed = True
@@ -1135,70 +986,16 @@ class ListControl(Control):
             self.__dict__[name] = value
 
     def _set_value(self, value):
-        if value is None or isstringlike(value):
-            raise TypeError("ListControl, must set a sequence")
-        if not value:
-            for o in self.items:
-                if not o.disabled:
-                    o.selected = False
-        elif self.multiple:
-            self._multiple_set_value(value)
-        elif len(value) > 1:
-            raise ItemCountError("single selection list, must set sequence of "
-                                 "length 0 or 1")
-        else:
-            self._single_set_value(value)
+        pass
 
     def _get_items(self, name, target=1):
-        all_items = self.get_items(name)
-        items = [o for o in all_items if not o.disabled]
-        if len(items) < target:
-            if len(all_items) < target:
-                raise ItemNotFoundError("insufficient items with name %r" %
-                                        name)
-            else:
-                raise AttributeError(
-                    "insufficient non-disabled items with name %s" % name)
-        on = []
-        off = []
-        for o in items:
-            if o.selected:
-                on.append(o)
-            else:
-                off.append(o)
-        return on, off
+        pass
 
     def _single_set_value(self, value):
-        assert len(value) == 1
-        on, off = self._get_items(value[0])
-        assert len(on) <= 1
-        if not on:
-            off[0].selected = True
+        pass
 
     def _multiple_set_value(self, value):
-        turn_on = []  # transactional-ish
-        turn_off = [
-            item for item in self.items
-            if item.selected and (not item.disabled)
-        ]
-        names = {}
-        for nn in value:
-            names[nn] = names.setdefault(nn, 0) + 1
-        for name, count in iteritems(names):
-            on, off = self._get_items(name, count)
-            for i in range(count):
-                if on:
-                    item = on[0]
-                    del on[0]
-                    del turn_off[turn_off.index(item)]
-                else:
-                    item = off[0]
-                    del off[0]
-                    turn_on.append(item)
-        for item in turn_off:
-            item.selected = False
-        for item in turn_on:
-            item.selected = True
+        pass
 
     def set_value_by_label(self, value):
         """Set the value of control by item labels.
@@ -1212,46 +1009,11 @@ class ListControl(Control):
         same item name (e.g. OPTION value).
 
         """
-        if isstringlike(value):
-            raise TypeError(value)
-        if not self.multiple and len(value) > 1:
-            raise ItemCountError("single selection list, must set sequence of "
-                                 "length 0 or 1")
-        items = []
-        for nn in value:
-            found = self.get_items(label=nn)
-            if len(found) > 1:
-                # ambiguous labels are fine as long as item names (e.g.
-                # OPTION values) are same
-                opt_name = found[0].name
-                if [o for o in found[1:] if o.name != opt_name]:
-                    raise AmbiguityError(nn)
-            for o in found:
-                # For the multiple-item case, we could try to be smarter,
-                # saving them up and trying to resolve, but that's too much.
-                if o not in items:
-                    items.append(o)
-                    break
-            else:  # all of them are used
-                raise ItemNotFoundError(nn)
-        # now we have all the items that should be on
-        # let's just turn everything off and then back on.
-        self.value = []
-        for o in items:
-            o.selected = True
+        pass
 
     def get_value_by_label(self):
         """Return the value of the control as given by normalized labels."""
-        res = []
-        for o in self.items:
-            if (not o.disabled) and o.selected:
-                for l in o.get_labels():
-                    if l.text:
-                        res.append(l.text)
-                        break
-                else:
-                    res.append(None)
-        return res
+        pass
 
     def possible_items(self, by_label=False):
         """Deprecated: return the names or labels of all possible items.
@@ -1259,25 +1021,10 @@ class ListControl(Control):
         Includes disabled items, which may be misleading for some use cases.
 
         """
-        deprecation("[item.name for item in self.items]")
-        if by_label:
-            res = []
-            for o in self.items:
-                for l in o.get_labels():
-                    if l.text:
-                        res.append(l.text)
-                        break
-                else:
-                    res.append(None)
-            return res
-        return [o.name for o in self.items]
+        pass
 
     def _totally_ordered_pairs(self):
-        if self.disabled or self.name is None:
-            return []
-        else:
-            return [(o._index, self.name, o.name) for o in self.items
-                    if o.selected and not o.disabled]
+        pass
 
     def __str__(self):
         name = self.name
@@ -1514,18 +1261,13 @@ class SubmitControl(ScalarControl):
         return res
 
     def is_of_kind(self, kind):
-        return kind == "clickable"
+        pass
 
     def _click(self, form, coord, return_type, request_class=_request.Request):
-        self._clicked = coord
-        r = form._switch_click(return_type, request_class)
-        self._clicked = False
-        return r
+        pass
 
     def _totally_ordered_pairs(self):
-        if not self._clicked:
-            return []
-        return ScalarControl._totally_ordered_pairs(self)
+        pass
 
 
 # ---------------------------------------------------
@@ -1544,20 +1286,7 @@ class ImageControl(SubmitControl):
         self.readonly = False
 
     def _totally_ordered_pairs(self):
-        clicked = self._clicked
-        if self.disabled or not clicked:
-            return []
-        name = self.name
-        if name is None:
-            return []
-        pairs = [
-            (self._index, "%s.x" % name, str(clicked[0])),
-            (self._index + 1, "%s.y" % name, str(clicked[1])),
-        ]
-        value = self._value
-        if value:
-            pairs.append((self._index + 2, name, value))
-        return pairs
+        pass
 
     get_labels = ScalarControl.get_labels
 
@@ -1580,7 +1309,7 @@ class SubmitButtonControl(SubmitControl):
 
 
 def is_listcontrol(control):
-    return control.is_of_kind("list")
+    pass
 
 
 class HTMLForm:
@@ -1985,19 +1714,7 @@ class HTMLForm:
             form[name]
 
         """
-        if by_label:
-            deprecation("form.get_value_by_label(...)")
-        c = self.find_control(name, type, kind, id, label=label, nr=nr)
-        if by_label:
-            try:
-                meth = c.get_value_by_label
-            except AttributeError:
-                raise NotImplementedError(
-                    "control '%s' does not yet support by_label" % c.name)
-            else:
-                return meth()
-        else:
-            return c.value
+        pass
 
     def set_value(
             self,
@@ -2018,19 +1735,7 @@ class HTMLForm:
             form[name] = value
 
         """
-        if by_label:
-            deprecation("form.get_value_by_label(...)")
-        c = self.find_control(name, type, kind, id, label=label, nr=nr)
-        if by_label:
-            try:
-                meth = c.set_value_by_label
-            except AttributeError:
-                raise NotImplementedError(
-                    "control '%s' does not yet support by_label" % c.name)
-            else:
-                meth(value)
-        else:
-            c.value = value
+        pass
 
     def get_value_by_label(self,
                            name=None,
@@ -2044,8 +1749,7 @@ class HTMLForm:
         All arguments should be passed by name.
 
         """
-        c = self.find_control(name, type, kind, id, label=label, nr=nr)
-        return c.get_value_by_label()
+        pass
 
     def set_value_by_label(self,
                            value,
@@ -2060,12 +1764,10 @@ class HTMLForm:
         All arguments should be passed by name.
 
         """
-        c = self.find_control(name, type, kind, id, label=label, nr=nr)
-        c.set_value_by_label(value)
+        pass
 
     def set_all_readonly(self, readonly):
-        for control in self.controls:
-            control.readonly = bool(readonly)
+        pass
 
     def clear_all(self):
         """Clear the value attributes of all controls in the form.
@@ -2073,8 +1775,7 @@ class HTMLForm:
         See :meth:`mechanize.HTMLForm.clear()`
 
         """
-        for control in self.controls:
-            control.clear()
+        pass
 
     def clear(self,
               name=None,
@@ -2089,8 +1790,7 @@ class HTMLForm:
         is subsequently set.  AttributeError is raised on readonly controls.
 
         """
-        c = self.find_control(name, type, kind, id, label=label, nr=nr)
-        c.clear()
+        pass
 
 # ---------------------------------------------------
 # Form-filling methods applying only to ListControls.
@@ -2105,8 +1805,7 @@ class HTMLForm:
             by_label=False,
             label=None):
         """Return a list of all values that the specified control can take."""
-        c = self._find_list_control(name, type, kind, id, label, nr)
-        return c.possible_items(by_label)
+        pass
 
     def set(
             self,
@@ -2124,8 +1823,7 @@ class HTMLForm:
         :arg selected: boolean selected state
 
         """
-        self._find_list_control(name, type, kind, id, label, nr).set(
-            selected, item_name, by_label)
+        pass
 
     def toggle(
             self,
@@ -2138,8 +1836,7 @@ class HTMLForm:
             by_label=False,
             label=None):
         """Toggle selected state of named list item."""
-        self._find_list_control(name, type, kind, id, label, nr).toggle(
-            item_name, by_label)
+        pass
 
     def set_single(
             self,
@@ -2168,8 +1865,7 @@ class HTMLForm:
             control.toggle_single()
 
         """  # by_label ignored and deprecated
-        self._find_list_control(name, type, kind, id, label,
-                                nr).set_single(selected)
+        pass
 
     def toggle_single(self,
                       name=None,
@@ -2184,8 +1880,7 @@ class HTMLForm:
         The rest is as for :meth:`mechanize.HTMLForm.set_single()`
 
         """  # by_label ignored and deprecated
-        self._find_list_control(name, type, kind, id, label,
-                                nr).toggle_single()
+        pass
 
 # ---------------------------------------------------
 # Form-filling method applying only to FileControls.
@@ -2223,9 +1918,7 @@ class HTMLForm:
           * `maxlength`: XXX hint of max content length in bytes?
 
         """
-        self.find_control(
-            name, "file", id=id, label=label,
-            nr=nr).add_file(file_object, content_type, filename)
+        pass
 
 # ---------------------------------------------------
 # Form submission methods, applying only to clickable controls.
@@ -2259,8 +1952,7 @@ class HTMLForm:
         difference if you clicked on an image.
 
         """
-        return self._click(name, type, id, label, nr, coord, "request",
-                           self._request_class)
+        pass
 
     def click_request_data(self,
                            name=None,
@@ -2277,8 +1969,7 @@ class HTMLForm:
         use the click method.
 
         """
-        return self._click(name, type, id, label, nr, coord, "request_data",
-                           self._request_class)
+        pass
 
     def click_pairs(self,
                     name=None,
@@ -2300,8 +1991,7 @@ class HTMLForm:
         information required for file upload.  If you need file upload and are
         not using mechanize, use click_request_data.
         """
-        return self._click(name, type, id, label, nr, coord, "pairs",
-                           self._request_class)
+        pass
 
 # ---------------------------------------------------
 
@@ -2348,12 +2038,7 @@ class HTMLForm:
         that radio controls and checkboxes never have labels: their items do.
 
         """
-        if ((name is None) and (type is None) and (kind is None) and
-                (id is None) and (label is None) and (predicate is None) and
-                (nr is None)):
-            raise ValueError(
-                "at least one argument must be supplied to specify control")
-        return self._find_control(name, type, kind, id, label, predicate, nr)
+        pass
 
 # ---------------------------------------------------
 # Private methods.
@@ -2365,89 +2050,10 @@ class HTMLForm:
                            id=None,
                            label=None,
                            nr=None):
-        if ((name is None) and (type is None) and (kind is None) and
-                (id is None) and (label is None) and (nr is None)):
-            raise ValueError(
-                "at least one argument must be supplied to specify control")
-
-        return self._find_control(name, type, kind, id, label, is_listcontrol,
-                                  nr)
+        pass
 
     def _find_control(self, name, type, kind, id, label, predicate, nr):
-        if ((name is not None) and (name is not Missing) and
-                not isstringlike(name)):
-            raise TypeError("control name must be string-like")
-        if (type is not None) and not isstringlike(type):
-            raise TypeError("control type must be string-like")
-        if (kind is not None) and not isstringlike(kind):
-            raise TypeError("control kind must be string-like")
-        if (id is not None) and not isstringlike(id):
-            raise TypeError("control id must be string-like")
-        if (label is not None) and not isstringlike(label):
-            raise TypeError("control label must be string-like")
-        if (predicate is not None) and not callable(predicate):
-            raise TypeError("control predicate must be callable")
-        if (nr is not None) and nr < 0:
-            raise ValueError("control number must be a positive integer")
-
-        orig_nr = nr
-        found = None
-        ambiguous = False
-
-        for control in self.controls:
-            if ((name is not None and name != control.name) and
-                    (name is not Missing or control.name is not None)):
-                continue
-            if type is not None and type != control.type:
-                continue
-            if kind is not None and not control.is_of_kind(kind):
-                continue
-            if id is not None and id != control.id:
-                continue
-            if predicate and not predicate(control):
-                continue
-            if label:
-                for l in control.get_labels():
-                    if l.text.find(label) > -1:
-                        break
-                else:
-                    continue
-            if nr is not None:
-                if nr == 0:
-                    return control  # early exit: unambiguous due to nr
-                nr -= 1
-                continue
-            if found:
-                ambiguous = True
-                break
-            found = control
-
-        if found and not ambiguous:
-            return found
-
-        description = []
-        if name is not None:
-            description.append("name %s" % repr(name))
-        if type is not None:
-            description.append("type '%s'" % type)
-        if kind is not None:
-            description.append("kind '%s'" % kind)
-        if id is not None:
-            description.append("id '%s'" % id)
-        if label is not None:
-            description.append("label '%s'" % label)
-        if predicate is not None:
-            description.append("predicate %s" % predicate)
-        if orig_nr:
-            description.append("nr %d" % orig_nr)
-        description = ", ".join(description)
-
-        if ambiguous:
-            raise AmbiguityError("more than one control matching " +
-                                 description)
-        elif not found:
-            raise ControlNotFoundError("no control matching " + description)
-        assert False
+        pass
 
     def _click(self,
                name,
@@ -2458,33 +2064,11 @@ class HTMLForm:
                coord,
                return_type,
                request_class=_request.Request):
-        try:
-            control = self._find_control(name, type, "clickable", id, label,
-                                         None, nr)
-        except ControlNotFoundError:
-            if ((name is not None) or (type is not None) or (id is not None) or
-                    (label is not None) or (nr != 0)):
-                raise
-            # no clickable controls, but no control was explicitly requested,
-            # so return state without clicking any control
-            return self._switch_click(return_type, request_class)
-        else:
-            originals = self.method, self.action, self.enctype
-            try:
-                if isinstance(control, ScalarControl):
-                    self.method = control.attrs.get(
-                        'formmethod') or self.method
-                    self.action = control.attrs.get(
-                        'formaction') or self.action
-                    self.enctype = control.attrs.get(
-                        'formenctype') or self.enctype
-                return control._click(self, coord, return_type, request_class)
-            finally:
-                self.method, self.action, self.enctype = originals
+        pass
 
     def _pairs(self):
         """Return sequence of (key, value) pairs suitable for urlencoding."""
-        return [(k, v) for (i, k, v, c_i) in self._pairs_and_controls()]
+        pass
 
     def _pairs_and_controls(self):
         """Return sequence of (index, key, value, control_index)
@@ -2492,82 +2076,13 @@ class HTMLForm:
 
         control_index is the index of the control in self.controls
         """
-        pairs = []
-        for control_index in range(len(self.controls)):
-            control = self.controls[control_index]
-            for ii, key, val in control._totally_ordered_pairs():
-                if ii is None:
-                    ii = -1
-                pairs.append((ii, key, val, control_index))
-
-        # stable sort by ONLY first item in tuple
-        pairs.sort()
-
-        return pairs
+        pass
 
     def _request_data(self):
         """Return a tuple (url, data, headers)."""
-        method = self.method.upper()
-        parts = self._urlparse(self.action)
-        rest, (query, frag) = parts[:-2], parts[-2:]
-        frag
-
-        def encode_data(x):
-            if isinstance(x, unicode_type):
-                x = x.encode(self.form_encoding)
-            return x
-
-        def encode_query():
-            p = [(encode_data(k), encode_data(v)) for k, v in self._pairs()]
-            return urlencode(p)
-
-        if method == "GET":
-            if self.enctype != "application/x-www-form-urlencoded":
-                raise ValueError("unknown GET form encoding type '%s'" %
-                                 self.enctype)
-            parts = rest + (encode_query(), None)
-            uri = self._urlunparse(parts)
-            return uri, None, []
-        elif method == "POST":
-            parts = rest + (query, None)
-            uri = self._urlunparse(parts)
-            if self.enctype == "application/x-www-form-urlencoded":
-                return (uri, encode_query(),
-                        [("Content-Type", self.enctype)])
-            elif self.enctype == "multipart/form-data":
-                data = StringIO()
-                http_hdrs = []
-                mw = MimeWriter(data, http_hdrs)
-                mw.startmultipartbody(
-                    "form-data", add_to_http_hdrs=True, prefix=0)
-                for ii, k, v, control_index in self._pairs_and_controls():
-                    self.controls[control_index]._write_mime_data(
-                            mw, encode_data(k), encode_data(v))
-                mw.lastpart()
-                return uri, data.getvalue(), http_hdrs
-            else:
-                raise ValueError("unknown POST form encoding type '%s'" %
-                                 self.enctype)
-        else:
-            raise ValueError("Unknown method '%s'" % method)
+        pass
 
     def _switch_click(self, return_type, request_class=_request.Request):
         # This is called by HTMLForm and clickable Controls to hide switching
         # on return_type.
-        if return_type == "pairs":
-            return self._pairs()
-        elif return_type == "request_data":
-            return self._request_data()
-        else:
-            req_data = self._request_data()
-            req = request_class(req_data[0], req_data[1])
-            for key, val in req_data[2]:
-                add_hdr = req.add_header
-                if key.lower() == "content-type":
-                    try:
-                        add_hdr = req.add_unredirected_header
-                    except AttributeError:
-                        # pre-2.4 and not using ClientCookie
-                        pass
-                add_hdr(key, val)
-            return req
+        pass

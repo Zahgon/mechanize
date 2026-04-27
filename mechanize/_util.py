@@ -20,7 +20,7 @@ class ExperimentalWarning(UserWarning):
 
 
 def experimental(message):
-    warnings.warn(message, ExperimentalWarning, stacklevel=3)
+    pass
 
 
 def hide_experimental_warnings():
@@ -32,15 +32,15 @@ def reset_experimental_warnings():
 
 
 def deprecation(message):
-    warnings.warn(message, DeprecationWarning, stacklevel=3)
+    pass
 
 
 def hide_deprecations():
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    pass
 
 
 def reset_deprecations():
-    warnings.filterwarnings("default", category=DeprecationWarning)
+    pass
 
 
 def read_file(filename):
@@ -104,11 +104,7 @@ def time2isoz(t=None):
     1994-11-24 08:49:37Z
 
     """
-    if t is None:
-        t = time.time()
-    year, mon, mday, hour, min, sec = time.gmtime(t)[:6]
-    return "%04d-%02d-%02d %02d:%02d:%02dZ" % (
-        year, mon, mday, hour, min, sec)
+    pass
 
 
 def time2netscape(t=None):
@@ -122,11 +118,7 @@ def time2netscape(t=None):
     Wed, DD-Mon-YYYY HH:MM:SS GMT
 
     """
-    if t is None:
-        t = time.time()
-    year, mon, mday, hour, min, sec, wday = time.gmtime(t)[:7]
-    return "%s %02d-%s-%04d %02d:%02d:%02d GMT" % (
-        days[wday], mday, months[mon - 1], year, hour, min, sec)
+    pass
 
 
 UTC_ZONES = {"GMT": None, "UTC": None, "UT": None, "Z": None}
@@ -318,19 +310,4 @@ def iso2time(text):
     19940203                     -- only date
 
     """
-    # clean up
-    text = text.lstrip()
-
-    # tz is time zone specifier string
-    day, mon, yr, hr, min, sec, tz = [None] * 7
-
-    # loose regexp parse
-    m = iso_re.search(text)
-    if m is not None:
-        # XXX there's an extra bit of the timezone I'm ignoring here: is
-        #   this the right thing to do?
-        yr, mon, day, hr, min, sec, tz, _ = m.groups()
-    else:
-        return None  # bad format
-
-    return _str2time(day, mon, yr, hr, min, sec, tz)
+    pass

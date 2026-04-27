@@ -147,29 +147,11 @@ class UserAgentBase(_opener.OpenerDirector):
         scheme, the set of handled schemes will not be changed.
 
         """
-        want = {}
-        for scheme in schemes:
-            if scheme.startswith("_"):
-                raise ValueError("not a scheme '%s'" % scheme)
-            if scheme not in self.handler_classes:
-                raise ValueError("unknown scheme '%s'")
-            want[scheme] = None
-
-        # get rid of scheme handlers we don't want
-        for scheme, oldhandler in tuple(iteritems(self._ua_handlers)):
-            if scheme.startswith("_"):
-                continue  # not a scheme handler
-            if scheme not in want:
-                self._replace_handler(scheme, None)
-            else:
-                del want[scheme]  # already got it
-        # add the scheme handlers that are missing
-        for scheme in want:
-            self._set_handler(scheme, True)
+        pass
 
     def set_cookiejar(self, cookiejar):
         """Set a mechanize.CookieJar, or None."""
-        self._set_handler("_cookies", obj=cookiejar)
+        pass
 
     # XXX could use Greg Stein's httpx for some of this instead?
     # or httplib2??
@@ -196,17 +178,13 @@ class UserAgentBase(_opener.OpenerDirector):
         ...     proxy_bypass)
 
         """
-        self._set_handler(
-            "_proxy",
-            True,
-            constructor_kwds=dict(proxies=proxies, proxy_bypass=proxy_bypass))
+        pass
 
     def add_password(self, url, user, password, realm=None):
-        self._password_manager.add_password(realm, url, user, password)
+        pass
 
     def add_proxy_password(self, user, password, hostport=None, realm=None):
-        self._proxy_password_manager.add_password(realm, hostport, user,
-                                                  password)
+        pass
 
     def add_client_certificate(self, url, key_file, cert_file):
         """Add an SSL client certificate, for HTTPS client auth.
@@ -225,7 +203,7 @@ class UserAgentBase(_opener.OpenerDirector):
         third-party libraries that (I assume) allow more options here.
 
         """
-        self._client_cert_manager.add_key_cert(url, key_file, cert_file)
+        pass
 
     # the following are rarely useful -- use add_password / add_proxy_password
     # instead
@@ -258,24 +236,16 @@ class UserAgentBase(_opener.OpenerDirector):
         2.7.9.
 
         '''
-        import ssl
-        if context is None:
-            try:
-                context = ssl.create_default_context(
-                    cafile=cafile, capath=capath, cadata=cadata)
-            except AttributeError:
-                raise RuntimeError('python >= 2.7.9 required')
-        handler = self._ua_handlers["https"]
-        handler.ssl_context = context
+        pass
 
     # these methods all take a boolean parameter
     def set_handle_robots(self, handle):
         """Set whether to observe rules from robots.txt."""
-        self._set_handler("_robots", handle)
+        pass
 
     def set_handle_redirect(self, handle):
         """Set whether to handle HTTP 30x redirections."""
-        self._set_handler("_redirect", handle)
+        pass
 
     def set_handle_refresh(self, handle, max_time=None, honor_time=True):
         """Set whether to handle HTTP Refresh headers."""
@@ -304,8 +274,7 @@ class UserAgentBase(_opener.OpenerDirector):
         it is handled automatically in any case, regardless of this setting.
 
         """
-        self._set_handler(
-            "_gzip", True, constructor_kwds={'request_gzip': bool(handle)})
+        pass
     set_handle_gzip = set_request_gzip  # legacy
 
     def set_debug_redirects(self, handle):
@@ -338,7 +307,7 @@ class UserAgentBase(_opener.OpenerDirector):
             logger.setLevel(logging.INFO)
 
         """
-        self._set_handler("_debug_redirect", handle)
+        pass
 
     def set_debug_responses(self, handle):
         """Log HTTP response bodies.
@@ -349,39 +318,17 @@ class UserAgentBase(_opener.OpenerDirector):
         responses are, raised HTTPError exception responses are not).
 
         """
-        self._set_handler("_debug_response_body", handle)
+        pass
 
     def set_debug_http(self, handle):
         """Print HTTP headers to sys.stdout."""
-        level = int(bool(handle))
-        for scheme in "http", "https":
-            h = self._ua_handlers.get(scheme)
-            if h is not None:
-                h.set_http_debuglevel(level)
+        pass
 
     def _copy_state(self, other):
-        if self._ua_handlers is None:
-            raise ValueError('Cannot copy state from a closed UserAgentBase')
-        other.addheaders = self.addheaders[:]
-        rmap = {v: k for k, v in iteritems(self._ua_handlers)}
-
-        def clone_handler(h):
-            ans = copy.copy(h)
-            ans.add_parent(other)
-            try:
-                other._ua_handlers[rmap[h]] = ans
-            except KeyError:
-                pass
-            return ans
-
-        other._ua_handlers.clear()
-        other.handlers = [clone_handler(h) for h in self.handlers]
-        other._handler_index_valid = False
+        pass
 
     def handlers_by_class(self, cls):
-        for h in self.handlers:
-            if isinstance(h, cls):
-                yield h
+        pass
 
     def _set_handler(self,
                      name,
@@ -424,22 +371,10 @@ class UserAgent(UserAgentBase):
 
     def set_seekable_responses(self, handle):
         """Make response objects .seek()able."""
-        self._seekable = bool(handle)
+        pass
 
     def open(self,
              fullurl,
              data=None,
              timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
-        if self._seekable:
-
-            def bound_open(fullurl,
-                           data=None,
-                           timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
-                return UserAgentBase.open(self, fullurl, data, timeout)
-
-            response = _opener.wrapped_open(bound_open,
-                                            _response.seek_wrapped_response,
-                                            fullurl, data, timeout)
-        else:
-            response = UserAgentBase.open(self, fullurl, data)
-        return response
+        pass

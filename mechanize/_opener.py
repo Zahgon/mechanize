@@ -69,88 +69,7 @@ class OpenerDirector(_urllib2_fork.OpenerDirector):
         self._handler_index_valid = False
 
     def _maybe_reindex_handlers(self):
-        if self._handler_index_valid:
-            return
-
-        handle_error = {}
-        handle_open = {}
-        process_request = {}
-        process_response = {}
-        any_request = set()
-        any_response = set()
-        unwanted = []
-
-        for handler in self.handlers:
-            added = False
-            for meth in dir(handler):
-                if meth in ["redirect_request", "do_open", "proxy_open"]:
-                    # oops, coincidental match
-                    continue
-
-                if meth == "any_request":
-                    any_request.add(handler)
-                    added = True
-                    continue
-                elif meth == "any_response":
-                    any_response.add(handler)
-                    added = True
-                    continue
-
-                ii = meth.find("_")
-                scheme = meth[:ii]
-                condition = meth[ii + 1:]
-
-                if condition.startswith("error"):
-                    jj = meth[ii + 1:].find("_") + ii + 1
-                    kind = meth[jj + 1:]
-                    try:
-                        kind = int(kind)
-                    except ValueError:
-                        pass
-                    lookup = handle_error.setdefault(scheme, {})
-                elif condition == "open":
-                    kind = scheme
-                    lookup = handle_open
-                elif condition == "request":
-                    kind = scheme
-                    lookup = process_request
-                elif condition == "response":
-                    kind = scheme
-                    lookup = process_response
-                else:
-                    continue
-
-                lookup.setdefault(kind, set()).add(handler)
-                added = True
-
-            if not added:
-                unwanted.append(handler)
-
-        for handler in unwanted:
-            self.handlers.remove(handler)
-
-        # sort indexed methods
-        # XXX could be cleaned up
-        for lookup in [process_request, process_response]:
-            for scheme, handlers in iteritems(lookup):
-                lookup[scheme] = handlers
-        for scheme, lookup in iteritems(handle_error):
-            for code, handlers in iteritems(lookup):
-                handlers = list(handlers)
-                handlers.sort()
-                lookup[code] = handlers
-        for scheme, handlers in iteritems(handle_open):
-            handlers = list(handlers)
-            handlers.sort()
-            handle_open[scheme] = handlers
-
-        # cache the indexes
-        self.handle_error = handle_error
-        self.handle_open = handle_open
-        self.process_request = process_request
-        self.process_response = process_response
-        self._any_request = any_request
-        self._any_response = any_response
+        pass
 
     def _request(self, url_or_req, data, visit,
                  timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
@@ -169,63 +88,10 @@ class OpenerDirector(_urllib2_fork.OpenerDirector):
 
     def open(self, fullurl, data=None,
              timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
-        req = self._request(fullurl, data, None, timeout)
-        req_scheme = req.get_type()
-
-        self._maybe_reindex_handlers()
-
-        # pre-process request
-        # XXX should we allow a Processor to change the URL scheme
-        #   of the request?
-        request_processors = set(self.process_request.get(req_scheme, []))
-        request_processors.update(self._any_request)
-        request_processors = list(request_processors)
-        request_processors.sort()
-        for processor in request_processors:
-            for meth_name in ["any_request", req_scheme + "_request"]:
-                meth = getattr(processor, meth_name, None)
-                if meth:
-                    req = meth(req)
-
-        # In Python >= 2.4, .open() supports processors already, so we must
-        # call ._open() instead.
-        urlopen = _urllib2_fork.OpenerDirector._open
-        response = urlopen(self, req, data)
-
-        # post-process response
-        response_processors = set(self.process_response.get(req_scheme, []))
-        response_processors.update(self._any_response)
-        response_processors = list(response_processors)
-        response_processors.sort()
-        for processor in response_processors:
-            for meth_name in ["any_response", req_scheme + "_response"]:
-                meth = getattr(processor, meth_name, None)
-                if meth:
-                    response = meth(req, response)
-
-        return response
+        pass
 
     def error(self, proto, *args):
-        if proto in ['http', 'https']:
-            # XXX http[s] protocols are special-cased
-            # https is not different than http
-            dict = self.handle_error['http']
-            proto = args[2]  # YUCK!
-            meth_name = 'http_error_%s' % proto
-            http_err = 1
-            orig_args = args
-        else:
-            dict = self.handle_error
-            meth_name = proto + '_error'
-            http_err = 0
-        args = (dict, proto, meth_name) + args
-        result = self._call_chain(*args)
-        if result:
-            return result
-
-        if http_err:
-            args = (dict, 'default', 'http_error_default') + orig_args
-            return self._call_chain(*args)
+        pass
 
     BLOCK_SIZE = 1024 * 8
 
@@ -316,41 +182,23 @@ class OpenerDirector(_urllib2_fork.OpenerDirector):
 
 def wrapped_open(urlopen, process_response_object, fullurl, data=None,
                  timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
-    success = True
-    try:
-        response = urlopen(fullurl, data, timeout)
-    except HTTPError as error:
-        success = False
-        if error.fp is None:  # not a response
-            raise
-        response = error
-
-    if response is not None:
-        response = process_response_object(response)
-
-    if not success:
-        raise response
-    return response
+    pass
 
 
 class ResponseProcessingOpener(OpenerDirector):
 
     def open(self, fullurl, data=None,
              timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
-        def bound_open(fullurl, data=None,
-                       timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
-            return OpenerDirector.open(self, fullurl, data, timeout)
-        return wrapped_open(
-            bound_open, self.process_response_object, fullurl, data, timeout)
+        pass
 
     def process_response_object(self, response):
-        return response
+        pass
 
 
 class SeekableResponseOpener(ResponseProcessingOpener):
 
     def process_response_object(self, response):
-        return _response.seek_wrapped_response(response)
+        pass
 
 
 class OpenerFactory:

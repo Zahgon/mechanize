@@ -57,17 +57,10 @@ class History:
         self._history.append((request, response))
 
     def back(self, n, _response):
-        response = _response  # XXX move Browser._response into this class?
-        while n > 0 or response is None:
-            try:
-                request, response = self._history.pop()
-            except IndexError:
-                raise BrowserStateError("already at start of history")
-            n -= 1
-        return request, response
+        pass
 
     def clear(self):
-        del self._history[:]
+        pass
 
     def close(self):
         for request, response in self._history:
@@ -88,10 +81,7 @@ class HTTPRefererProcessor(_urllib2_fork.BaseHandler):
         # Browser.click() / Browser.submit() / Browser.follow_link().
         # Otherwise, it's the user's job to add any Referer header before
         # .open()ing.
-        if hasattr(request, "redirect_dict"):
-            request = self.parent._add_referer_header(
-                request, origin_request=False)
-        return request
+        pass
 
     https_request = http_request
 
@@ -200,27 +190,10 @@ class Browser(UserAgentBase):
 
     def set_handle_referer(self, handle):
         """Set whether to add Referer header to each request."""
-        self._set_handler("_referer", handle)
-        self._handle_referer = bool(handle)
+        pass
 
     def _add_referer_header(self, request, origin_request=True):
-        if self.request is None:
-            return request
-        scheme = request.get_type()
-        original_scheme = self.request.get_type()
-        if scheme not in ["http", "https"]:
-            return request
-        if not origin_request and not self.request.has_header("Referer"):
-            return request
-
-        if (self._handle_referer and original_scheme in ["http", "https"] and
-                not (original_scheme == "https" and scheme != "https")):
-            # strip URL fragment (RFC 2616 14.36)
-            parts = _rfc3986.urlsplit(self.request.get_full_url())
-            parts = parts[:-1] + (None, )
-            referer = _rfc3986.urlunsplit(parts)
-            request.add_unredirected_header("Referer", referer)
-        return request
+        pass
 
     def open_novisit(self,
                      url_or_request,
@@ -238,8 +211,7 @@ class Browser(UserAgentBase):
         See also :meth:`retrieve()`
 
         """
-        return self._mech_open(
-            url_or_request, data, visit=False, timeout=timeout)
+        pass
 
     def open(self,
              url_or_request,
@@ -254,7 +226,7 @@ class Browser(UserAgentBase):
         :param timeout: Timeout in seconds
         :return: A :class:`mechanize.Response` object
         '''
-        return self._mech_open(url_or_request, data, timeout=timeout)
+        pass
 
     def _mech_open(self,
                    url,
@@ -262,56 +234,7 @@ class Browser(UserAgentBase):
                    update_history=True,
                    visit=None,
                    timeout=_sockettimeout._GLOBAL_DEFAULT_TIMEOUT):
-        try:
-            url.get_full_url
-        except AttributeError:
-            # string URL -- convert to absolute URL if required
-            scheme, authority = _rfc3986.urlsplit(url)[:2]
-            if scheme is None:
-                # relative URL
-                if self._response is None:
-                    raise BrowserStateError("can't fetch relative reference: "
-                                            "not viewing any document")
-                url = _rfc3986.urljoin(self._response.geturl(), url)
-
-        request = self._request(url, data, visit, timeout)
-        visit = request.visit
-        if visit is None:
-            visit = True
-
-        if visit:
-            self._visit_request(request, update_history)
-
-        success = True
-        try:
-            response = UserAgentBase.open(self, request, data)
-        except HTTPError as error:
-            success = False
-            if error.fp is None:  # not a response
-                raise
-            response = error
-
-#         except (IOError, socket.error, OSError) as error:
-#             Yes, urllib2 really does raise all these :-((
-#             See test_urllib2.py for examples of socket.gaierror and OSError,
-#             plus note that FTPHandler raises IOError.
-#             XXX I don't seem to have an example of exactly socket.error being
-#              raised, only socket.gaierror...
-#             I don't want to start fixing these here, though, since this is a
-#             subclass of OpenerDirector, and it would break old code.  Even in
-#             Python core, a fix would need some backwards-compat. hack to be
-#             acceptable.
-#             raise
-
-        if visit:
-            self._set_response(response, False)
-            response = copy.copy(self._response)
-        elif response is not None:
-            response = _response.upgrade_response(response)
-
-        if not success:
-            raise response
-        return response
+        pass
 
     def __str__(self):
         text = []
@@ -332,12 +255,10 @@ class Browser(UserAgentBase):
         :meth:`.open()`
 
         """
-        return copy.copy(self._response)
+        pass
 
     def open_local_file(self, filename):
-        path = sanepathname2url(os.path.abspath(filename))
-        url = 'file://' + path
-        return self.open(url)
+        pass
 
     def set_response(self, response):
         """Replace current response with (a copy of) response.
@@ -369,20 +290,10 @@ class Browser(UserAgentBase):
         Unlike :meth:`set_response()`, this updates history rather than
         replacing the current response.
         """
-        if request is None:
-            request = _request.Request(response.geturl())
-        self._visit_request(request, True)
-        self._set_response(response, False)
+        pass
 
     def _visit_request(self, request, update_history):
-        if self._response is not None:
-            self._response.close()
-        if self.request is not None and update_history:
-            self._history.add(self.request, self._response)
-        self._response = None
-        # we want self.request to be assigned even if UserAgentBase.open
-        # fails
-        self.request = request
+        pass
 
     def set_html(self, html, url="http://example.com/"):
         """Set the response to dummy with given HTML, and URL if given.
@@ -390,8 +301,7 @@ class Browser(UserAgentBase):
         Allows you to then parse that HTML, especially to extract forms
         information. If no URL was given then the default is "example.com".
         """
-        response = make_response(html, [("Content-type", "text/html")], url)
-        self._set_response(response, True)
+        pass
 
     def geturl(self):
         """Get URL of current document."""
@@ -401,11 +311,7 @@ class Browser(UserAgentBase):
 
     def reload(self):
         """Reload current document, and return response object."""
-        if self.request is None:
-            raise BrowserStateError("no URL has yet been .open()ed")
-        if self._response is not None:
-            self._response.close()
-        return self._mech_open(self.request, update_history=False)
+        pass
 
     def back(self, n=1):
         """Go back n steps in history, and return response object.
@@ -413,16 +319,10 @@ class Browser(UserAgentBase):
         n: go back this number of steps (default 1 step)
 
         """
-        if self._response is not None:
-            self._response.close()
-        self.request, response = self._history.back(n, self._response)
-        self.set_response(response)
-        if not response.read_complete:
-            return self.reload()
-        return copy.copy(response)
+        pass
 
     def clear_history(self):
-        self._history.clear()
+        pass
 
     def set_cookie(self, cookie_string):
         """Set a cookie.
@@ -457,16 +357,7 @@ class Browser(UserAgentBase):
         See also :meth:`set_simple_cookie()` for an easier way to set cookies
         without needing to create a Set-Cookie header string.
         """
-        if self._response is None:
-            raise BrowserStateError("not viewing any document")
-        if self.request.get_type() not in ["http", "https"]:
-            raise BrowserStateError("can't set cookie for non-HTTP/HTTPS "
-                                    "transactions")
-        cookiejar = self._ua_handlers["_cookies"].cookiejar
-        response = self.response()  # copy
-        headers = response.info()
-        headers["Set-cookie"] = cookie_string
-        cookiejar.extract_cookies(response, self.request)
+        pass
 
     def set_simple_cookie(self, name, value, domain, path='/'):
         '''
@@ -480,17 +371,12 @@ class Browser(UserAgentBase):
             browser.set_simple_cookie('some_key', 'some_value', '.example.com',
                                       path='/some-page')
         '''
-        self.cookiejar.set_cookie(
-            Cookie(0, name, value, None, False, domain, True, False, path,
-                   True, False, None, False, None, None, None))
+        pass
 
     @property
     def cookiejar(self):
         ' Return the current cookiejar (:class:`mechanize.CookieJar`) or None '
-        try:
-            return self._ua_handlers["_cookies"].cookiejar
-        except Exception:
-            pass
+        pass
 
     def set_header(self, header, value=None):
         '''
@@ -500,32 +386,11 @@ class Browser(UserAgentBase):
         :param header: The header name, e.g. User-Agent
         :param value: The header value. If set to None the header is removed.
         '''
-        found = False
-        header = normalize_header_name(header)
-        q = header.lower()
-        remove = []
-        for i, (k, v) in enumerate(tuple(self.addheaders)):
-            if k.lower() == q:
-                if value:
-                    self.addheaders[i] = (header, value)
-                    found = True
-                else:
-                    remove.append(i)
-        if not found:
-            self.addheaders.append((header, value))
-        if remove:
-            for i in reversed(remove):
-                del self.addheaders[i]
+        pass
 
     def links(self, **kwds):
         """Return iterable over links (:class:`mechanize.Link` objects)."""
-        if not self.viewing_html():
-            raise BrowserStateError("not viewing HTML")
-        links = self._factory.links()
-        if kwds:
-            return self._filter_links(links, **kwds)
-        else:
-            return links
+        pass
 
     def forms(self):
         """Return iterable over forms.
@@ -534,9 +399,7 @@ class Browser(UserAgentBase):
         interface.
 
         """
-        if not self.viewing_html():
-            raise BrowserStateError("not viewing HTML")
-        return self._factory.forms()
+        pass
 
     def global_form(self):
         """Return the global form object, or None if the factory implementation
@@ -553,15 +416,11 @@ class Browser(UserAgentBase):
         backwards-compatibility.
 
         """
-        if not self.viewing_html():
-            raise BrowserStateError("not viewing HTML")
-        return self._factory.global_form
+        pass
 
     def viewing_html(self):
         """Return whether the current response contains HTML data."""
-        if self._response is None:
-            raise BrowserStateError("not viewing any document")
-        return self._factory.is_html
+        pass
 
     def encoding(self):
         if self._response is None:
@@ -570,9 +429,7 @@ class Browser(UserAgentBase):
 
     def title(self):
         ' Return title, or None if there is no title element in the document. '
-        if not self.viewing_html():
-            raise BrowserStateError("not viewing HTML")
-        return self._factory.title
+        pass
 
     def select_form(self, name=None, predicate=None, nr=None, **attrs):
         """Select an HTML form for input.
@@ -624,68 +481,11 @@ class Browser(UserAgentBase):
             br.select_form(data_form_type=re.compile(r'a|b'))
 
         """
-        if not self.viewing_html():
-            raise BrowserStateError("not viewing HTML")
-        if name is None and predicate is None and nr is None and not attrs:
-            raise ValueError(
-                "at least one argument must be supplied to specify form")
-
-        global_form = self._factory.global_form
-        if nr is None and name is None and predicate is not None and predicate(
-                global_form):
-            self.form = global_form
-            return
-
-        def attr_selector(q):
-            if is_string(q):
-                return lambda x: x == q
-            if callable(q):
-                return q
-            return lambda x: q.match(x) is not None
-        attrsq = {aname.rstrip('_').replace('_', '-'): attr_selector(v)
-                  for aname, v in iteritems(attrs)}
-
-        def form_attrs_match(form_attrs):
-            for aname, q in iteritems(attrsq):
-                val = form_attrs.get(aname)
-                if val is None or not q(val):
-                    return False
-            return True
-
-        orig_nr = nr
-        for form in self.forms():
-            if name is not None and name != form.name:
-                continue
-            if predicate is not None and not predicate(form):
-                continue
-            if nr:
-                nr -= 1
-                continue
-            if attrs and not form_attrs_match(form.attrs):
-                continue
-            self.form = form
-            break  # success
-        else:
-            # failure
-            description = []
-            if name is not None:
-                description.append("name '%s'" % name)
-            if predicate is not None:
-                description.append("predicate %s" % predicate)
-            if orig_nr is not None:
-                description.append("nr %d" % orig_nr)
-            if attrs:
-                for k, v in iteritems(attrs):
-                    description.append('%s = %r' % (k, v))
-            description = ", ".join(description)
-            raise FormNotFoundError("no form matching " + description)
+        pass
 
     def click(self, *args, **kwds):
         """See :meth:`mechanize.HTMLForm.click()` for documentation."""
-        if not self.viewing_html():
-            raise BrowserStateError("not viewing HTML")
-        request = self.form.click(*args, **kwds)
-        return self._add_referer_header(request)
+        pass
 
     def submit(self, *args, **kwds):
         """Submit current form.
@@ -694,7 +494,7 @@ class Browser(UserAgentBase):
 
         Return value is same as for :meth:`open()`.
         """
-        return self.open(self.click(*args, **kwds))
+        pass
 
     def click_link(self, link=None, **kwds):
         """Find a link and return a Request object for it.
@@ -703,16 +503,7 @@ class Browser(UserAgentBase):
         supplied as the first argument.
 
         """
-        if not self.viewing_html():
-            raise BrowserStateError("not viewing HTML")
-        if not link:
-            link = self.find_link(**kwds)
-        else:
-            if kwds:
-                raise ValueError(
-                    "either pass a Link, or keyword arguments, not both")
-        request = self.request_class(link.absolute_url)
-        return self._add_referer_header(request)
+        pass
 
     def follow_link(self, link=None, **kwds):
         """Find a link and :meth:`open()` it.
@@ -722,7 +513,7 @@ class Browser(UserAgentBase):
         Return value is same as for :meth:`open()`.
 
         """
-        return self.open(self.click_link(link, **kwds))
+        pass
 
     def find_link(self,
                   text=None,
@@ -782,12 +573,7 @@ class Browser(UserAgentBase):
             criteria (default 0)
 
         """
-        try:
-            return next(self._filter_links(
-                self._factory.links(), text, text_regex, name, name_regex, url,
-                url_regex, tag, predicate, nr))
-        except StopIteration:
-            raise LinkNotFoundError()
+        pass
 
     def __getattr__(self, name):
         # pass through _form.HTMLForm methods and attributes
@@ -819,35 +605,4 @@ class Browser(UserAgentBase):
                       tag=None,
                       predicate=None,
                       nr=0):
-        if not self.viewing_html():
-            raise BrowserStateError("not viewing HTML")
-
-        orig_nr = nr
-
-        for link in links:
-            if url is not None and url != link.url:
-                continue
-            if url_regex is not None and not re.search(url_regex, link.url):
-                continue
-            if (text is not None and (link.text is None or text != link.text)):
-                continue
-            if (
-                    text_regex is not None and (
-                        link.text is None or not re.search(
-                            text_regex, link.text))):
-                continue
-            if name is not None and name != dict(link.attrs).get("name"):
-                continue
-            if name_regex is not None:
-                link_name = dict(link.attrs).get("name")
-                if link_name is None or not re.search(name_regex, link_name):
-                    continue
-            if tag is not None and tag != link.tag:
-                continue
-            if predicate is not None and not predicate(link):
-                continue
-            if nr:
-                nr -= 1
-                continue
-            yield link
-            nr = orig_nr
+        pass

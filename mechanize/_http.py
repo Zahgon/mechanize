@@ -33,8 +33,7 @@ debug_robots = logging.getLogger("mechanize.robots").debug
 
 def parse_head(fileobj):
     """Return a list of key, value pairs."""
-    p = HTTPEquivParser(fileobj.read(4096))
-    return p()
+    pass
 
 
 class HTTPEquivProcessor(BaseHandler):
@@ -43,31 +42,7 @@ class HTTPEquivProcessor(BaseHandler):
     handler_order = 300  # before handlers that look at HTTP headers
 
     def http_response(self, request, response):
-        if not hasattr(response, "seek"):
-            response = response_seek_wrapper(response)
-        http_message = response.info()
-        url = response.geturl()
-        ct_hdrs = http_message.getheaders("content-type")
-        if is_html(ct_hdrs, url, True):
-            try:
-                try:
-                    html_headers = parse_head(response)
-                finally:
-                    response.seek(0)
-            except Exception:
-                pass
-            else:
-                for hdr, val in html_headers:
-                    if is_py2:
-                        # add a header
-                        http_message.dict[hdr.lower()] = val
-                        text = hdr + b": " + val
-                        for line in text.split(b"\n"):
-                            http_message.headers.append(line + b"\n")
-                    else:
-                        hdr = hdr.decode('iso-8859-1')
-                        http_message[hdr] = val.decode('iso-8859-1')
-        return response
+        pass
 
     https_response = http_response
 
@@ -86,7 +61,7 @@ class MechanizeRobotFileParser(RobotFileParser):
         self._opener = opener
 
     def set_timeout(self, timeout):
-        self._timeout = timeout
+        pass
 
     def read(self):
         """Reads the robots.txt URL and feeds it to the parser."""
@@ -146,48 +121,7 @@ class HTTPRobotRulesProcessor(BaseHandler):
         return self.__class__(self.rfp_class)
 
     def http_request(self, request):
-        scheme = request.get_type()
-        if scheme not in ["http", "https"]:
-            # robots exclusion only applies to HTTP
-            return request
-
-        if request.get_selector() == "/robots.txt":
-            # /robots.txt is always OK to fetch
-            return request
-
-        host = request.get_host()
-
-        # robots.txt requests don't need to be allowed by robots.txt :-)
-        origin_req = getattr(request, "_origin_req", None)
-        if (origin_req is not None and
-                origin_req.get_selector() == "/robots.txt" and
-                origin_req.get_host() == host):
-            return request
-
-        if host != self._host:
-            self.rfp = self.rfp_class()
-            try:
-                self.rfp.set_opener(self.parent)
-            except AttributeError:
-                debug("%r instance does not support set_opener" %
-                      self.rfp.__class__)
-            self.rfp.set_url(scheme + "://" + host + "/robots.txt")
-            self.rfp.set_timeout(request.timeout)
-            self.rfp.read()
-            self._host = host
-
-        ua = request.get_header("User-agent", "")
-        if self.rfp.can_fetch(ua, request.get_full_url()):
-            return request
-        else:
-            # XXX This should really have raised URLError.  Too late now...
-            factory = self.http_response_class or create_response_info
-            msg = b"request disallowed by robots.txt"
-            raise RobotExclusionError(
-                request,
-                request.get_full_url(),
-                403, msg,
-                factory(BytesIO()), BytesIO(msg))
+        pass
 
     https_request = http_request
 
@@ -208,14 +142,10 @@ class HTTPRefererProcessor(BaseHandler):
         self.referer = None
 
     def http_request(self, request):
-        if ((self.referer is not None) and
-                not request.has_header("Referer")):
-            request.add_unredirected_header("Referer", self.referer)
-        return request
+        pass
 
     def http_response(self, request, response):
-        self.referer = response.geturl()
-        return response
+        pass
 
     https_request = http_request
     https_response = http_response
@@ -223,10 +153,7 @@ class HTTPRefererProcessor(BaseHandler):
 
 def clean_refresh_url(url):
     # e.g. Firefox 1.5 does (something like) this
-    if ((url.startswith('"') and url.endswith('"')) or
-            (url.startswith("'") and url.endswith("'"))):
-        url = url[1:-1]
-    return _rfc3986.clean_url(url, 'utf-8')  # XXX encoding
+    pass
 
 
 def parse_refresh_header(refresh):
@@ -242,20 +169,7 @@ def parse_refresh_header(refresh):
     ValueError: invalid literal for float(): blah
 
     """
-
-    ii = refresh.find(";")
-    if ii != -1:
-        pause, newurl_spec = float(refresh[:ii]), refresh[ii + 1:]
-        jj = newurl_spec.find("=")
-        key = None
-        if jj != -1:
-            key, newurl = newurl_spec[:jj], newurl_spec[jj + 1:]
-            newurl = clean_refresh_url(newurl)
-        if key is None or key.strip().lower() != "url":
-            raise ValueError()
-    else:
-        pause, newurl = float(refresh), None
-    return pause, newurl
+    pass
 
 
 class HTTPRefreshProcessor(BaseHandler):
@@ -287,29 +201,6 @@ class HTTPRefreshProcessor(BaseHandler):
         return self.__class__(self.max_time, self.honor_time)
 
     def http_response(self, request, response):
-        code, msg, hdrs = response.code, response.msg, response.info()
-
-        if code == 200 and 'refresh' in hdrs:
-            refresh = hdrs.getheaders("refresh")[0]
-            try:
-                pause, newurl = parse_refresh_header(refresh)
-            except ValueError:
-                debug("bad Refresh header: %r" % refresh)
-                return response
-
-            if newurl is None:
-                newurl = response.geturl()
-            if (self.max_time is None) or (pause <= self.max_time):
-                if pause > 1E-3 and self.honor_time:
-                    self._sleep(pause)
-                hdrs["location"] = newurl
-                # hardcoded http is NOT a bug
-                response = self.parent.error(
-                    "http", request, response,
-                    "refresh", msg, hdrs)
-            else:
-                debug("Refresh header ignored: %r" % refresh)
-
-        return response
+        pass
 
     https_response = http_response

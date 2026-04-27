@@ -110,8 +110,7 @@ else:
 
     # We want __getitem__ to return the last header not the first
     def getitem(self, name):
-        vals = self.get_all(name, [None])
-        return vals[-1]
+        pass
     HTTPMessage.__getitem__ = getitem
 
     # Legacy method names

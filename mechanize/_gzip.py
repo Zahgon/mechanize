@@ -134,7 +134,7 @@ class UnzipWrapper:
         self.__fp.close()
 
     def fileno(self):
-        return self.__fp.fileno()
+        pass
 
     def __iter__(self):
         ans = self.readline()
@@ -142,35 +142,11 @@ class UnzipWrapper:
             yield ans
 
     def next(self):
-        ans = self.readline()
-        if not ans:
-            raise StopIteration()
-        return ans
+        pass
 
 
 def create_gzip_decompressor(zipped_file):
-    prefix = read_amt(zipped_file, 10)
-    if prefix[:2] != b'\x1f\x8b':
-        raise ValueError('gzip stream has incorrect magic bytes: %r' %
-                         prefix[:2])
-    if prefix[2:3] != b'\x08':
-        raise ValueError('gzip stream has unknown compression method: %r' %
-                         prefix[2])
-    flag = ord(prefix[3:4])
-    if flag & 4:  # extra
-        extra_amt = read_amt(zipped_file, 2)
-        extra_amt = ord(extra_amt[0]) + 256 * ord(extra_amt[1])
-        if extra_amt:
-            read_amt(zipped_file, extra_amt)
-    if flag & 8:  # filename
-        while read_amt(zipped_file, 1) != b'\0':
-            continue
-    if flag & 16:  # comment
-        while read_amt(zipped_file, 1) != b'\0':
-            continue
-    if flag & 2:  # crc
-        read_amt(zipped_file, 2)
-    return UnzipWrapper(zipped_file)
+    pass
 
 
 class HTTPGzipProcessor(BaseHandler):
@@ -183,27 +159,11 @@ class HTTPGzipProcessor(BaseHandler):
         return self.__class__(self.request_gzip)
 
     def http_request(self, request):
-        if self.request_gzip:
-            existing = [
-                x.strip().lower()
-                for x in request.get_header('Accept-Encoding', '').split(',')
-            ]
-            if 'gzip' not in existing:
-                existing.append('gzip')
-                request.add_header("Accept-Encoding",
-                                   ', '.join(filter(None, existing)))
-        return request
+        pass
 
     def http_response(self, request, response):
         # post-process response
-        h = response.info()
-        enc_hdrs = h.getheaders("Content-encoding")
-        for enc_hdr in enc_hdrs:
-            if "gzip" in enc_hdr:
-                response._set_fp(create_gzip_decompressor(response.fp))
-                del h['Content-encoding']
-                del h['Content-length']
-        return response
+        pass
 
     https_response = http_response
     https_request = http_request

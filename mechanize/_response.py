@@ -89,7 +89,7 @@ class seek_wrapper:
         # The end of the cache is always at the same place as the end of the
         # wrapped file (though the .tell() method is not required to be present
         # on wrapped file).
-        return self.wrapped.tell() == len(self.__cache.getvalue())
+        pass
 
     def close(self):
         self.wrapped.close()
@@ -238,14 +238,7 @@ class seek_wrapper:
         return r
 
     def readlines(self, sizehint=-1):
-        pos = self.__pos
-        self.__cache.seek(0, 2)
-        self.__cache.write(self.wrapped.read())
-        self.read_complete = True
-        self.__cache.seek(pos)
-        data = self.__cache.readlines(sizehint)
-        self.__pos = self.__cache.tell()
-        return data
+        pass
 
     def __iter__(self):
         return self
@@ -291,7 +284,7 @@ class response_seek_wrapper(seek_wrapper):
 
     @property
     def headers(self):
-        return self._headers
+        pass
 
     def geturl(self):
         return self.wrapped.geturl()
@@ -340,7 +333,7 @@ class eofresponse(eoffile):
 
     @property
     def headers(self):
-        return self._headers
+        pass
 
 
 class closeable_response:
@@ -402,19 +395,16 @@ class closeable_response:
 
     @property
     def headers(self):
-        return self._headers
+        pass
 
     def getcode(self):
-        return self.code
+        pass
 
     def get_header_values(self, name):
-        return self._headers.get_all(name)
+        pass
 
     def get_all_header_names(self, normalize=True):
-        ans = self._headers.keys()
-        if normalize:
-            ans = list(map(normalize_header_name, ans))
-        return ans
+        pass
 
     def __getitem__(self, name):
         return self._headers[name]

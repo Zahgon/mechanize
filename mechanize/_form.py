@@ -13,7 +13,7 @@ class SkipControl(ValueError):
 
 
 def normalize_line_endings(text):
-    return re.sub(as_unicode(r"(?:(?<!\r)\n)|(?:\r(?!\n))"), u"\r\n", text)
+    pass
 
 
 def label_text(elem):
@@ -27,53 +27,27 @@ def label_text(elem):
 
 
 def parse_control(elem, parent_of, default_type='text'):
-    attrs = dict(elem.attrib)
-    label_elem = parent_of(elem, 'label')
-    if label_elem is not None:
-        lt = label_text(label_elem)
-        if lt:
-            attrs["__label"] = lt
-    ctype = attrs.get('type') or default_type
-    return ctype, attrs.get('name'), attrs
+    pass
 
 
 def parse_input(elem, parent_of, *a):
-    return parse_control(elem, parent_of)
+    pass
 
 
 def parse_button(elem, parent_of, *a):
-    ctype, name, attrs = parse_control(elem, parent_of, default_type='submit')
-    ctype += 'button'
-    return ctype, name, attrs
+    pass
 
 
 def parse_option(elem, parent_of, attrs_map):
-    ctype, name, attrs = parse_control(elem, parent_of)
-    og = parent_of(elem, 'optgroup')
-    contents = (elem.text or '').strip()
-    attrs['contents'] = contents
-    attrs['value'] = attrs.get('value', contents)
-    attrs['label'] = attrs.get('label', contents)
-    if og is not None and og.get('disabled') is not None:
-        attrs['disabled'] = 'disabled'
-    sel = parent_of(elem, 'select')
-    if sel is None:
-        raise SkipControl()
-    attrs['__select'] = sel = attrs_map[sel]['__select']
-    return 'select', sel.get('name'), attrs
+    pass
 
 
 def parse_textarea(elem, parent_of, *a):
-    ctype, name, attrs = parse_control(elem, parent_of)
-    ctype = 'textarea'
-    attrs['value'] = normalize_line_endings(elem.text or u'')
-    return ctype, name, attrs
+    pass
 
 
 def parse_select(elem, parent_of, *a):
-    ctype, name, attrs = parse_control(elem, parent_of)
-    ctype = 'select'
-    return ctype, name, {'__select': attrs}
+    pass
 
 
 def parse_forms(root, base_url, request_class=None, select_default=False, encoding=None):

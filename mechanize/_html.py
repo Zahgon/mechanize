@@ -22,10 +22,7 @@ _encoding_pats = (
 
 
 def compile_pats(binary):
-    for raw in _encoding_pats:
-        if binary:
-            raw = raw.encode('ascii')
-        yield re.compile(raw, flags=re.IGNORECASE)
+    pass
 
 
 class LazyEncodingPats(object):
@@ -56,33 +53,11 @@ def find_declared_encoding(raw, limit=50*1024):
 
 
 def elem_text(elem):
-    if elem.text:
-        yield elem.text
-    for child in elem:
-        for text in elem_text(child):
-            yield text
-        if child.tail:
-            yield child.tail
+    pass
 
 
 def iterlinks(root, base_url):
-    link_tags = {"a": "href", "area": "href", "iframe": "src"}
-    for tag in root.iter('*'):
-        if not is_string(tag.tag):
-            continue
-        q = tag.tag.lower()
-        attr = link_tags.get(q)
-        if attr is not None:
-            val = tag.get(attr)
-            if val:
-                url = clean_url(val)
-                yield Link(base_url, url,
-                           compress_whitespace(u''.join(elem_text(tag))), q,
-                           tag.items())
-        elif q == 'base':
-            href = tag.get('href')
-            if href:
-                base_url = href
+    pass
 
 
 def compress_whitespace(text):
@@ -284,55 +259,26 @@ class Factory:
 
     @property
     def root(self):
-        if self._root is lazy:
-            response = self._response
-            raw = self._response.read() if self._response else b''
-            default_encoding = self._encoding_finder._default_encoding
-            transport_encoding = get_encoding_from_response(response, verify=False)
-            declared_encoding = find_declared_encoding(raw)
-            self.form_encoding = declared_encoding or transport_encoding or default_encoding
-            self._root = self._content_parser(
-                raw,
-                url=response.geturl() if response else None,
-                response_info=response.info() if response else None,
-                default_encoding=default_encoding,
-                is_html=self.is_html,
-                transport_encoding=transport_encoding)
-        return self._root
+        pass
 
     @property
     def title(self):
-        if self._current_title is lazy:
-            self._current_title = get_title(
-                self.root) if self.root is not None else None
-        return self._current_title or u''
+        pass
 
     @property
     def global_form(self):
-        if self._current_global_form is lazy:
-            self.forms()
-        return self._current_global_form
+        pass
 
     def forms(self):
         """ Return tuple of HTMLForm-like objects. """
-        # this implementation sets .global_form as a side-effect
-        if self._current_forms is lazy:
-            self._current_forms, self._current_global_form = self._get_forms()
-        return self._current_forms
+        pass
 
     def links(self):
         """Return tuple of mechanize.Link-like objects.  """
-        if self._current_links is lazy:
-            self._current_links = self._get_links()
-        return self._get_links()
+        pass
 
     def _get_links(self):
-        if self.root is None:
-            return ()
-        return tuple(iterlinks(self.root, self._response.geturl()))
+        pass
 
     def _get_forms(self):
-        if self.root is None:
-            return (), None
-        return parse_forms(self.root,
-                           self._response.geturl(), self._request_class, encoding=self.form_encoding)
+        pass

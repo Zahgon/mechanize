@@ -10,11 +10,10 @@ class SetupStack(object):
         self._on_teardown = []
 
     def add_teardown(self, teardown):
-        self._on_teardown.append(teardown)
+        pass
 
     def tear_down(self):
-        for func in reversed(self._on_teardown):
-            func()
+        pass
 
 
 class TearDownConvenience(object):
@@ -26,20 +25,12 @@ class TearDownConvenience(object):
 
     # only call this convenience method if no setup_stack was supplied to c'tor
     def tear_down(self):
-        assert self._own_setup_stack
-        self._setup_stack.tear_down()
+        pass
 
 
 class TempDirMaker(TearDownConvenience):
     def make_temp_dir(self, dir_=None):
-        temp_dir = tempfile.mkdtemp(
-            prefix="tmp-%s-" % self.__class__.__name__, dir=dir_)
-
-        def tear_down():
-            shutil.rmtree(temp_dir)
-
-        self._setup_stack.add_teardown(tear_down)
-        return temp_dir
+        pass
 
 
 class MonkeyPatcher(TearDownConvenience):
@@ -47,31 +38,13 @@ class MonkeyPatcher(TearDownConvenience):
     Unset = object()
 
     def monkey_patch(self, obj, name, value):
-        orig_value = getattr(obj, name)
-        setattr(obj, name, value)
-
-        def reverse_patch():
-            setattr(obj, name, orig_value)
-
-        self._setup_stack.add_teardown(reverse_patch)
+        pass
 
     def _set_environ(self, env, name, value):
-        if value is self.Unset:
-            try:
-                del env[name]
-            except KeyError:
-                pass
-        else:
-            env[name] = value
+        pass
 
     def monkey_patch_environ(self, name, value, env=os.environ):
-        orig_value = env.get(name, self.Unset)
-        self._set_environ(env, name, value)
-
-        def reverse_patch():
-            self._set_environ(env, name, orig_value)
-
-        self._setup_stack.add_teardown(reverse_patch)
+        pass
 
 
 class FixtureFactory(object):
@@ -81,58 +54,48 @@ class FixtureFactory(object):
         self._fixtures = {}
 
     def register_context_manager(self, name, context_manager):
-        self._context_managers[name] = context_manager
+        pass
 
     def get_fixture(self, name, add_teardown):
-        context_manager = self._context_managers[name]
-        fixture = context_manager.__enter__()
-        add_teardown(lambda: context_manager.__exit__(None, None, None))
-        return fixture
+        pass
 
     def get_cached_fixture(self, name):
-        fixture = self._fixtures.get(name)
-        if fixture is None:
-            fixture = self.get_fixture(name, self._setup_stack.add_teardown)
-            self._fixtures[name] = fixture
-        return fixture
+        pass
 
     def tear_down(self):
-        self._setup_stack.tear_down()
+        pass
 
 
 class TestCase(unittest.TestCase):
     def setUp(self):
-        self._setup_stack = SetupStack()
-        self._monkey_patcher = MonkeyPatcher(self._setup_stack)
+        pass
 
     def tearDown(self):
-        self._setup_stack.tear_down()
+        pass
 
     def register_context_manager(self, name, context_manager):
-        return self.fixture_factory.register_context_manager(name,
-                                                             context_manager)
+        pass
 
     def get_fixture(self, name):
-        return self.fixture_factory.get_fixture(name, self.add_teardown)
+        pass
 
     def get_cached_fixture(self, name):
-        return self.fixture_factory.get_cached_fixture(name)
+        pass
 
     def add_teardown(self, *args, **kwds):
-        self._setup_stack.add_teardown(*args, **kwds)
+        pass
 
     def make_temp_dir(self, *args, **kwds):
-        return TempDirMaker(self._setup_stack).make_temp_dir(*args, **kwds)
+        pass
 
     def monkey_patch(self, *args, **kwds):
-        return self._monkey_patcher.monkey_patch(*args, **kwds)
+        pass
 
     def monkey_patch_environ(self, *args, **kwds):
-        return self._monkey_patcher.monkey_patch_environ(*args, **kwds)
+        pass
 
     def assert_contains(self, container, containee):
-        self.assertTrue(containee in container,
-                        "%r not in %r" % (containee, container))
+        pass
 
     def assert_less_than(self, got, expected):
-        self.assertTrue(got < expected, "%r >= %r" % (got, expected))
+        pass

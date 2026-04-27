@@ -170,30 +170,11 @@ def join_header_words(lists):
     'text/plain, charset="iso-8859/1"'
 
     """
-    headers = []
-    for pairs in lists:
-        attr = []
-        for k, v in pairs:
-            if v is not None:
-                if not re.search(r"^\w+$", v):
-                    v = join_escape_re.sub(r"\\\1", v)  # escape " and \
-                    v = '"%s"' % v
-                if k is None:  # Netscape cookies may have no name
-                    k = v
-                else:
-                    k = "%s=%s" % (k, v)
-            attr.append(k)
-        if attr:
-            headers.append("; ".join(attr))
-    return ", ".join(headers)
+    pass
 
 
 def strip_quotes(text):
-    if text.startswith('"'):
-        text = text[1:]
-    if text.endswith('"'):
-        text = text[:-1]
-    return text
+    pass
 
 
 def parse_ns_headers(ns_headers):
@@ -211,50 +192,7 @@ def parse_ns_headers(ns_headers):
     Currently, this is also used for parsing RFC 2109 cookies.
 
     """
-    known_attrs = (
-        "expires",
-        "domain",
-        "path",
-        "secure",
-        # RFC 2109 attrs (may turn up in Netscape cookies, too)
-        "version",
-        "port",
-        "max-age")
-
-    result = []
-    for ns_header in ns_headers:
-        pairs = []
-        version_set = False
-        params = re.split(r";\s*", ns_header)
-        for ii in range(len(params)):
-            param = params[ii]
-            param = param.rstrip()
-            if param == "":
-                continue
-            if "=" not in param:
-                k, v = param, None
-            else:
-                k, v = re.split(r"\s*=\s*", param, 1)
-                k = k.lstrip()
-            if ii != 0:
-                lc = k.lower()
-                if lc in known_attrs:
-                    k = lc
-                if k == "version":
-                    # This is an RFC 2109 cookie.
-                    v = strip_quotes(v)
-                    version_set = True
-                if k == "expires":
-                    # convert expires date to seconds since epoch
-                    v = http2time(strip_quotes(v))  # None if invalid
-            pairs.append((k, v))
-
-        if pairs:
-            if not version_set:
-                pairs.append(("version", "0"))
-            result.append(pairs)
-
-    return result
+    pass
 
 
 uppercase_headers = {'WWW', 'TE'}
