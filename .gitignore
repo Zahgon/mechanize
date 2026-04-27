@@ -4,3 +4,6 @@
 *.egg-info/
 *.py[co]
 .venv*
+
+.aider*
+logs/
